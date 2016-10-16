@@ -106,7 +106,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                Intent intent = new Intent(getActivity().getBaseContext(), pt.ua.tomasr.imhere.example.MainActivity.class);
+                Intent intent = new Intent(getActivity().getBaseContext(), pt.ua.tomasr.imhere.chat.MainActivity.class);
                 intent.putExtra("chat_title", marker.getTitle());
                 intent.putExtra("chat_subtitle", marker.getSnippet());
                 startActivityForResult(intent, 1);

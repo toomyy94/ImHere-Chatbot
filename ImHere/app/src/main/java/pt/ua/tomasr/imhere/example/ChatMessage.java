@@ -1,4 +1,4 @@
-package pt.ua.tomasr.imhere.example;
+package pt.ua.tomasr.imhere.chat;
 
 /**
  * Created by himanshusoni on 06/09/15.

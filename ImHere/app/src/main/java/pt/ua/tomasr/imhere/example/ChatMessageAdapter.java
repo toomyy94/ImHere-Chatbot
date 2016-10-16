@@ -1,4 +1,4 @@
-package pt.ua.tomasr.imhere.example;
+package pt.ua.tomasr.imhere.chat;
 
 import android.content.Context;
 import android.view.LayoutInflater;

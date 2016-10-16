@@ -1,4 +1,4 @@
-package pt.ua.tomasr.imhere.example;
+package pt.ua.tomasr.imhere.chat;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;

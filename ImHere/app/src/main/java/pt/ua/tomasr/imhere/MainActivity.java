@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Intent intent = new Intent(getBaseContext(), pt.ua.tomasr.imhere.example.MainActivity.class);
+            Intent intent = new Intent(getBaseContext(), pt.ua.tomasr.imhere.chat.MainActivity.class);
             startActivityForResult(intent, 1);
         }
         else if(id == R.id.action_signout) {
