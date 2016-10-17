@@ -61,6 +61,19 @@ public class MainActivity extends AppCompatActivity {
                 sendMessage(message);
                 mEditTextMessage.setText("");
 
+                //ChatServer
+//                MessageBroker test = new MessageBroker();
+//                test.connect();
+//                //test.createChannel();
+//                try{
+//                    test.consume("hello");
+//                    test.publish("hello","Please work");
+//                }
+//                catch (IOException e){
+//                    Log.i("IOException","rabbit error!");
+//                }
+
+
                 //ChatBot
                 URL url;
                 HttpURLConnection urlConnection = null;

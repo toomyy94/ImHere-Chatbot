@@ -5,6 +5,8 @@
  */
 package pt.ua.tomasr.imhere.rabbitmq;
 
+import android.util.Log;
+
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -12,6 +14,7 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
+
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -21,11 +24,13 @@ public class MessageBroker {
     private final static String QUEUE_NAME = "login";
     private Channel channel;
     private Connection connection;
-    
+
+
     public void connect(){
         try {
             ConnectionFactory factory = new ConnectionFactory();
-            factory.setHost("x.x.x.x.servidordo.jorge");
+            //factory.setHost("x.x.x.x.servidordo.jorge");
+            factory.setHost("localhost");
             connection = factory.newConnection();
             channel = connection.createChannel();  
             
@@ -40,7 +45,7 @@ public class MessageBroker {
     
     public void publish(String queue_name, String message) throws IOException{
         channel.basicPublish("", queue_name, null, message.getBytes());
-        System.out.println(" [x] Sent '" + message + "'");
+        Log.i("teste1: "," [x] Sent '" + message + "'");
     }
     
     public void consume(String queue_name) throws IOException{
@@ -49,7 +54,7 @@ public class MessageBroker {
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
                 throws IOException {
               String message = new String(body, "UTF-8");
-              System.out.println(" [x] Received '" + message + "'");
+              Log.i("teste2: "," [x] Received '" + message + "'");
             }
         };
         channel.basicConsume(queue_name, true, consumer);
