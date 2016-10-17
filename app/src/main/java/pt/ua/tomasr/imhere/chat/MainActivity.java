@@ -12,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 import pt.ua.tomasr.imhere.R;
@@ -58,6 +60,37 @@ public class MainActivity extends AppCompatActivity {
                 }
                 sendMessage(message);
                 mEditTextMessage.setText("");
+
+                //ChatBot
+                URL url;
+                HttpURLConnection urlConnection = null;
+                if(message.startsWith("@")) {
+                    try {
+//                        url = new URL("x.x.x.x.servidordo.andre/runService/message?=" + message);
+//
+//                        urlConnection = (HttpURLConnection) url.openConnection();
+//                        InputStream in = urlConnection.getInputStream();
+//                        InputStreamReader isw = new InputStreamReader(in);
+//
+//                        int data = isw.read();
+//                        while (data != -1) {
+//                            char current = (char) data;
+//                            data = isw.read();
+//                            Log.i("Andre: ", "" + current);
+//                            sendMessage("" + current);
+//                        }
+                        mimicOtherMessage("[Inserir mensagem do André]");
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (urlConnection != null) {
+                            urlConnection.disconnect();
+                        }
+                    }
+                }
+
+
             }
         });
 
@@ -67,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
                 sendMessage();
             }
         });
-
 
     }
 
