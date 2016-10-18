@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import pt.ua.tomasr.imhere.chat.ChatActivity;
 import pt.ua.tomasr.imhere.modules.LocationCoord;
 
 import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_BLUE;
@@ -106,7 +107,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                Intent intent = new Intent(getActivity().getBaseContext(), pt.ua.tomasr.imhere.chat.MainActivity.class);
+                Intent intent = new Intent(getActivity().getBaseContext(), ChatActivity.class);
                 intent.putExtra("chat_title", marker.getTitle());
                 intent.putExtra("chat_subtitle", marker.getSnippet());
                 startActivityForResult(intent, 1);

@@ -14,7 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/textView"
-        android:layout_marginTop="@dimen/place_autocomplete_prediction_secondary_text"
         android:textAlignment="center"
         android:textSize="36sp"
         android:textStyle="normal|bold" />

@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 import pt.ua.tomasr.imhere.R;
 
-public class MainActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity {
 
     private ListView mListView;
     private Button mButtonSend;

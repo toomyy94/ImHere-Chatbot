@@ -25,11 +25,13 @@ import android.view.View;
 
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.Marker;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
+import pt.ua.tomasr.imhere.chat.ChatActivity;
 import pt.ua.tomasr.imhere.modules.LocationCoord;
 
 
@@ -44,6 +46,8 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Log.i("token: ", FirebaseInstanceId.getInstance().getToken());
 
         //Wifi Manage
         WifiManager wifi;
@@ -161,7 +165,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Intent intent = new Intent(getBaseContext(), pt.ua.tomasr.imhere.chat.MainActivity.class);
+            Intent intent = new Intent(getBaseContext(), ChatActivity.class);
             startActivityForResult(intent, 1);
         }
         else if(id == R.id.action_signout) {
