@@ -75,6 +75,8 @@ public class MainActivity extends AppCompatActivity
         String extraFromId = getIntent().getStringExtra("EXTRA_SESSION_Id");
         Uri extraFromPhoto = getIntent().getData();
 
+        Log.i("Login:",extraFromName+" está logado!");
+
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(extraFromId.getBytes("UTF-16")); // Change this to "UTF-16" if needed
@@ -193,7 +195,7 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_map) {
 
-            MapFragment fragment = new MapFragment(gps, mMarkers, mCircle);
+            MapFragment fragment = new MapFragment(gps);
             FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);

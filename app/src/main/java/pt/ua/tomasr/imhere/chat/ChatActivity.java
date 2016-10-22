@@ -1,5 +1,7 @@
 package pt.ua.tomasr.imhere.chat;
 
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -12,6 +14,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,6 +31,7 @@ public class ChatActivity extends AppCompatActivity {
     private Button mButtonSend;
     private EditText mEditTextMessage;
     private ImageView mImageView;
+    private String mensagem_do_bot="mesagem do bot";
 
 
     private ChatMessageAdapter mAdapter;
@@ -42,6 +50,9 @@ public class ChatActivity extends AppCompatActivity {
         TextView subTitle = (TextView) findViewById(R.id.chat_subtitle);
         subTitle.setText(extrasubTitle);//subtittle
 
+        //Google Auth Info
+        final String extraFromName = getIntent().getStringExtra("EXTRA_SESSION_Name");
+
         mListView = (ListView) findViewById(R.id.listView);
         mButtonSend = (Button) findViewById(R.id.btn_send);
         mEditTextMessage = (EditText) findViewById(R.id.et_message);
@@ -54,55 +65,26 @@ public class ChatActivity extends AppCompatActivity {
         mButtonSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 String message = mEditTextMessage.getText().toString();
                 if (TextUtils.isEmpty(message)) {
                     return;
                 }
-                sendMessage(message);
+                sendMessage(extraFromName+": "+message);
                 mEditTextMessage.setText("");
 
-                //ChatServer
-//                MessageBroker test = new MessageBroker();
-//                test.connect();
-//                //test.createChannel();
-//                try{
-//                    test.consume("hello");
-//                    test.publish("hello","Please work");
-//                }
-//                catch (IOException e){
-//                    Log.i("IOException","rabbit error!");
-//                }
-
-
                 //ChatBot
-                URL url;
-                HttpURLConnection urlConnection = null;
                 if(message.startsWith("@")) {
-                    try {
-//                        url = new URL("x.x.x.x.servidordo.andre/runService/message?=" + message);
-//
-//                        urlConnection = (HttpURLConnection) url.openConnection();
-//                        InputStream in = urlConnection.getInputStream();
-//                        InputStreamReader isw = new InputStreamReader(in);
-//
-//                        int data = isw.read();
-//                        while (data != -1) {
-//                            char current = (char) data;
-//                            data = isw.read();
-//                            Log.i("Andre: ", "" + current);
-//                            sendMessage("" + current);
-//                        }
-                        mimicOtherMessage("[Inserir mensagem do André]");
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (urlConnection != null) {
-                            urlConnection.disconnect();
-                        }
-                    }
+
+                    //      HTTP GET CLOSESTS POINTS
+                    JSONObject json_obtido;
+                    String URL = "http://192.168.8.217:5010/runService?message="+message;
+
+                    new ChatActivity.GETChatBotMessage().execute(URL);
+
+                    mimicOtherMessage(mensagem_do_bot);
                 }
-
 
             }
         });
@@ -120,7 +102,7 @@ public class ChatActivity extends AppCompatActivity {
         ChatMessage chatMessage = new ChatMessage(message, true, false);
         mAdapter.add(chatMessage);
 
-        mimicOtherMessage(message);
+        //mimicOtherMessage(message);
     }
 
     private void mimicOtherMessage(String message) {
@@ -161,5 +143,52 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private class GETChatBotMessage extends AsyncTask<String, Void, String> {
+        private ProgressDialog pDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            StringBuilder result = new StringBuilder();
+            try {
+                URL url = new URL(urls[0]);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line;
+                while ((line = rd.readLine()) != null) {
+                    result.append(line);
+                }
+                rd.close();
+
+                String resultado = result.toString();
+                JSONArray jArray = new JSONArray(resultado);
+
+                for (int i=0; i < jArray.length(); i++) {
+
+                    JSONObject oneObject = jArray.getJSONObject(i);
+
+                    // Pulling items from the Objects
+                    mensagem_do_bot = oneObject.getString("message");
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return mensagem_do_bot;
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+        }
+
     }
 }

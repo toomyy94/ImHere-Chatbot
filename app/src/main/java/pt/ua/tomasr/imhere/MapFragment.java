@@ -1,10 +1,14 @@
 package pt.ua.tomasr.imhere;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +24,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,41 +54,35 @@ import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_YELL
 @SuppressLint("ValidFragment")
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
+
     //On Map View
     private GoogleMap mMap;
     private List<Circle> mCircle = new ArrayList<>();
     private List<Marker> mMarkers = new ArrayList<>();
     private LocationCoord gps;
 
+    //Gets
+    ArrayList<Double> ClosestPoints = new ArrayList<Double>();
+
     //Variaveis adicionais(create chat)
-    private String chat_name, chat_description, chat_password, event_type;
-    private Double chat_radius, chat_time;
-    private Boolean isPublic;
+      private String chat_name, chat_description, chat_password, event_type;
+//    private Double chat_radius, chat_time;
+//    private Boolean isPublic;
 
     public MapFragment(LocationCoord gps) {
         this.gps = gps;
     }
 
-    public MapFragment(LocationCoord gps, List<Marker> mMarkers, List<Circle> mCircle) {
-        this.gps = gps;
-        this.mMarkers = mMarkers;
-        this.mCircle = mCircle;
-    }
-
-    public MapFragment(LocationCoord gps, String chat_name, String chat_description, Double chat_radius, Double chat_time, Boolean isPublic, String chat_password, String event_type) {
-        this.gps = gps;
-        this.chat_name = chat_name;
-        this.chat_description = chat_description;
-        this.chat_radius = chat_radius;
-        this.chat_time = chat_time;
-        this.isPublic = isPublic;
-        this.chat_password = chat_password;
-        this.event_type = event_type;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+//      HTTP GET CLOSESTS POINTS
+        JSONObject json_obtido;
+        String URL = "http://192.168.8.217:5011/location/closestPoints?latitude="+gps.getLatitude()+
+                "&longitude="+gps.getLongitude()+"&points=10&distance=150000";
+
+        new GETClosestsPoints().execute(URL);
 
     }
 
@@ -95,13 +100,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        Log.i("json",""+ClosestPoints);
 
         googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+        if(ClosestPoints==null) SystemClock.sleep(1500);
+        Double[] a_closests = ClosestPoints.toArray(new Double[ClosestPoints.size()]);
 
-        if(chat_radius != null && chat_name != null && event_type!=null){
-            addCircle(chat_radius);
-            addMarker(chat_name, chat_description, event_type);
+        //Desenhar Closest Points
+        for(int i=0; i< ClosestPoints.size(); i+=5) {
+            addClosestCircle(a_closests[i+2],a_closests[i+3],a_closests[i+4]);
+            //addMarker(chat_name, chat_description, event_type);
+            addClosestMarker(a_closests[i+2],a_closests[i+3]);
         }
+
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
         {
@@ -119,9 +130,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gps.getLatitude(), gps.getLongitude()), 2));
     }
 
-    public void addCircle(Double chat_radius) {
+    public void addClosestCircle(Double chat_lat, Double chat_lon, Double chat_radius) {
         mCircle.add(mMap.addCircle(new CircleOptions().center(
-                new LatLng((gps.getLatitude()), gps.getLongitude())).radius(chat_radius).fillColor(Color.argb(120, 0, 0, 200)).strokeColor(Color.argb(90, 0, 0, 200)).strokeWidth(8)));
+                new LatLng(chat_lat, chat_lon)).radius(chat_radius).fillColor(Color.argb(120, 0, 0, 200)).strokeColor(Color.argb(90, 0, 0, 200)).strokeWidth(8)));
     }
 
     public void addMarker(String chat_name, String chat_description, String event_type) {
@@ -156,6 +167,38 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 defaultMarker(cor))));
     }
 
+    public void addClosestMarker(Double chat_lat, Double chat_lon) {
+        float cor = HUE_YELLOW;
+//        switch (event_type){
+//            case "Music festival":
+//                cor = HUE_ROSE;
+//                break;
+//            case "Local show":
+//                cor = HUE_VIOLET;
+//                break;
+//            case "Street market":
+//                cor = HUE_ORANGE;
+//                break;
+//            case "Building Reunion":
+//                cor = HUE_BLUE;
+//                break;
+//            case "School/University":
+//                cor = HUE_GREEN;
+//                break;
+//            case "Sport related":
+//                cor = HUE_MAGENTA;
+//                break;
+//            case "Other":
+//                cor = HUE_YELLOW;
+//                break;
+//        }
+
+        mMarkers.add(mMap.addMarker(new MarkerOptions().position(
+                new LatLng(chat_lat, chat_lon)).
+                title("falta informação outro serviço").snippet("falta informação outro serviço").icon(BitmapDescriptorFactory.
+                defaultMarker(cor))));
+    }
+
     public float distFrom(float lat1, float lng1, float lat2, float lng2) {
         double earthRadius = 6371000; //meters
         double dLat = Math.toRadians(lat2-lat1);
@@ -170,6 +213,63 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
+    private class GETClosestsPoints extends AsyncTask<String, Void, ArrayList> {
+        private ProgressDialog pDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected ArrayList doInBackground(String... urls) {
+
+            StringBuilder result = new StringBuilder();
+            try {
+            URL url = new URL(urls[0]);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String line;
+            while ((line = rd.readLine()) != null) {
+                result.append(line);
+            }
+            rd.close();
+
+            String resultado = result.toString();
+            JSONArray jArray = new JSONArray(resultado);
+
+            for (int i=0; i < jArray.length(); i++) {
+
+                JSONObject oneObject = jArray.getJSONObject(i);
+
+                // Pulling items from the Objects
+                double d_id = oneObject.getDouble("id");
+                double d_distance = oneObject.getDouble("distance");
+                double d_latitude = oneObject.getDouble("latitude");
+                double d_longitude = oneObject.getDouble("longitude");
+                double d_radius = oneObject.getDouble("radius");
+
+                //Add to the list
+                ClosestPoints.add(d_id);
+                ClosestPoints.add(d_distance);
+                ClosestPoints.add(d_latitude);
+                ClosestPoints.add(d_longitude);
+                ClosestPoints.add(d_radius);
+
+            }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return ClosestPoints;
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+        }
+
+    }
 
 
 

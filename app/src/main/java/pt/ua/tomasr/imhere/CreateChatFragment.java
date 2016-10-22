@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,11 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 import pt.ua.tomasr.imhere.modules.LocationCoord;
 
@@ -33,6 +39,7 @@ public class CreateChatFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -82,9 +89,15 @@ public class CreateChatFragment extends Fragment {
                 Boolean str_checkBox_public = checkBox_public.isChecked();
                 String str_chat_password = chat_password.getText().toString();
                 String str_evento = evento.getSelectedItem().toString();
+
                 try {
                     str_chat_radius = Double.parseDouble(chat_radius.getText().toString());
-                } catch (NumberFormatException e) {
+
+                    post("http://192.168.8.217:5011/location/point",
+                            "{\"latitude\":"+gps.getLatitude()+", \"longitude\":"+gps.getLatitude()+", \"radius\":"+str_chat_radius+"}");
+
+                } catch (Exception e) {
+                    Log.e("erro","Radius n é um Double ou Erro no Post");
                     Fragment MapFragment = new MapFragment(gps);
                     //Fragment MapFragment = new MapFragment(gps);
                     FragmentTransaction transaction = getFragmentManager().beginTransaction();
@@ -95,8 +108,8 @@ public class CreateChatFragment extends Fragment {
 
 
                 //Voltar ao mapa
-                Fragment MapFragment = new MapFragment(gps, str_chat_name, str_chat_description, str_chat_radius, str_chat_time, str_checkBox_public, str_chat_password, str_evento);
-                //Fragment MapFragment = new MapFragment(gps);
+                //Fragment MapFragment = new MapFragment(gps, str_chat_name, str_chat_description, str_chat_radius, str_chat_time, str_checkBox_public, str_chat_password, str_evento);
+                Fragment MapFragment = new MapFragment(gps);
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragment_container, MapFragment); // give your fragment container id in first parameter
                 transaction.addToBackStack(null);  // if written, this transaction will be added to backstack
@@ -106,6 +119,20 @@ public class CreateChatFragment extends Fragment {
 
 
         return view;
+    }
+
+    public static void post(String url, String param ) throws Exception{
+        String charset = "UTF-8";
+        URLConnection connection = new URL(url).openConnection();
+        connection.setDoOutput(true); // Triggers POST.
+        connection.setRequestProperty("Accept-Charset", charset);
+        connection.setRequestProperty("Content-Type", "application/json;charset=" + charset);
+
+        try (OutputStream output = connection.getOutputStream()) {
+            output.write(param.getBytes(charset));
+        }
+
+        InputStream response = connection.getInputStream();
     }
 
 
