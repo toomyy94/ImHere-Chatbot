@@ -20,6 +20,8 @@ import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
+import pt.ua.tomasr.imhere.chat.ChatActivity;
+
 /**
 * Activity to demonstrate basic retrieval of the Google user's ID, email address, and basic
 * profile.
@@ -137,13 +139,16 @@ public class SignInActivity extends AppCompatActivity implements
         Uri personPhoto = acct.getPhotoUrl();
 
         //Pass Infos
-        Intent intent = new Intent(getBaseContext(), MainActivity.class);
-        intent.putExtra("EXTRA_SESSION_Name", personName);
-        intent.putExtra("EXTRA_SESSION_Email", personEmail);
-        intent.putExtra("EXTRA_SESSION_Id", personId);
-        intent.putExtra("EXTRA_SESSION_Photo", personPhoto);
+        Intent intent_Main = new Intent(getBaseContext(), MainActivity.class);
+        intent_Main.putExtra("EXTRA_SESSION_Name", personName);
+        intent_Main.putExtra("EXTRA_SESSION_Email", personEmail);
+        intent_Main.putExtra("EXTRA_SESSION_Id", personId);
+        intent_Main.putExtra("EXTRA_SESSION_Photo", personPhoto);
 
-        startActivity(intent);
+        Intent intent_Chat = new Intent(getBaseContext(), ChatActivity.class);
+        intent_Chat.putExtra("EXTRA_SESSION_Name", personName);
+
+        startActivity(intent_Main);
     } else {
         // Signed out, show unauthenticated UI.
         updateUI(false);

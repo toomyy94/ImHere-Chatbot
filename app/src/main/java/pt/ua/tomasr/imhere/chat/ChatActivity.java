@@ -3,8 +3,10 @@ package pt.ua.tomasr.imhere.chat;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,7 +33,7 @@ public class ChatActivity extends AppCompatActivity {
     private Button mButtonSend;
     private EditText mEditTextMessage;
     private ImageView mImageView;
-    private String mensagem_do_bot="mesagem do bot";
+    private String mensagem_do_bot="Bot: ";
 
 
     private ChatMessageAdapter mAdapter;
@@ -52,6 +54,7 @@ public class ChatActivity extends AppCompatActivity {
 
         //Google Auth Info
         final String extraFromName = getIntent().getStringExtra("EXTRA_SESSION_Name");
+        Log.i("nome",extraFromName);
 
         mListView = (ListView) findViewById(R.id.listView);
         mButtonSend = (Button) findViewById(R.id.btn_send);
@@ -79,10 +82,12 @@ public class ChatActivity extends AppCompatActivity {
 
                     //      HTTP GET CLOSESTS POINTS
                     JSONObject json_obtido;
+                    message = message.substring(1); //tirar o @
+                    if(message.contains(" "))message = message.replace(" ","%20");
+                    Log.i("mensagem",message);
                     String URL = "http://192.168.8.217:5010/runService?message="+message;
-
                     new ChatActivity.GETChatBotMessage().execute(URL);
-
+                    if(mensagem_do_bot.equals("Bot: ")) SystemClock.sleep(1500);
                     mimicOtherMessage(mensagem_do_bot);
                 }
 
@@ -157,8 +162,8 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... urls) {
 
-            StringBuilder result = new StringBuilder();
             try {
+                StringBuilder result = new StringBuilder();
                 URL url = new URL(urls[0]);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
@@ -172,15 +177,21 @@ public class ChatActivity extends AppCompatActivity {
                 String resultado = result.toString();
                 JSONArray jArray = new JSONArray(resultado);
 
-                for (int i=0; i < jArray.length(); i++) {
+                ArrayList<String> list = new ArrayList<String>();
 
-                    JSONObject oneObject = jArray.getJSONObject(i);
-
-                    // Pulling items from the Objects
-                    mensagem_do_bot = oneObject.getString("message");
-
+                if (jArray != null) {
+                    int len = jArray.length();
+                    for (int i=0;i<len;i++){
+                        list.add(jArray.get(i).toString());
+                    }
                 }
+                for(int i=0; i<list.size();i++) {
+                    mensagem_do_bot += list.get(i).toString();
+                }
+
+                return mensagem_do_bot;
             } catch (Exception e) {
+                Log.e("erro","Erro no GET da Mensagem do bot!!!");
                 e.printStackTrace();
             }
             return mensagem_do_bot;
