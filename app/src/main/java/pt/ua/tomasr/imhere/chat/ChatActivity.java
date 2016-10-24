@@ -52,9 +52,6 @@ public class ChatActivity extends AppCompatActivity {
         TextView subTitle = (TextView) findViewById(R.id.chat_subtitle);
         subTitle.setText(extrasubTitle);//subtittle
 
-        //Google Auth Info
-        final String extraFromName = getIntent().getStringExtra("EXTRA_SESSION_Name");
-        Log.i("nome",extraFromName);
 
         mListView = (ListView) findViewById(R.id.listView);
         mButtonSend = (Button) findViewById(R.id.btn_send);
@@ -68,6 +65,9 @@ public class ChatActivity extends AppCompatActivity {
         mButtonSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Google Auth Info
+                String extraFromName = getIntent().getStringExtra("EXTRA_SESSION_Name");
+                Log.i("nome",""+extraFromName);
 
                 String message = mEditTextMessage.getText().toString();
                 if (TextUtils.isEmpty(message)) {
@@ -78,7 +78,6 @@ public class ChatActivity extends AppCompatActivity {
 
                 //ChatBot
                 if(message.startsWith("@")) {
-
 
                     //      HTTP GET CLOSESTS POINTS
                     JSONObject json_obtido;
@@ -185,9 +184,10 @@ public class ChatActivity extends AppCompatActivity {
                         list.add(jArray.get(i).toString());
                     }
                 }
-                for(int i=0; i<list.size();i++) {
-                    mensagem_do_bot += list.get(i).toString();
-                }
+                //for(int i=0; i<list.size();i++) {
+                    mensagem_do_bot = "Bot: ";
+                    mensagem_do_bot += list.get(0).toString();
+                //}
 
                 return mensagem_do_bot;
             } catch (Exception e) {

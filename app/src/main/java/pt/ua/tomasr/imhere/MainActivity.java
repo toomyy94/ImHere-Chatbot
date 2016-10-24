@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity
 
         Log.i("token: ", FirebaseInstanceId.getInstance().getToken());
 
+
         //Wifi Manage
         WifiManager wifi;
         wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);

@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -134,6 +135,7 @@ public class CreateChatFragment extends Fragment {
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getActivity(),"Já existe um chat neste exato local!", Toast.LENGTH_SHORT).show();
                         VolleyLog.e("Error: ", error.getMessage());
                     }
                 });

@@ -134,10 +134,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     if(marker.getPosition().equals(circulos)) {
                         Log.i("posicao","circulo perto, entrei");
 
+                        String extraFromName = getActivity().getIntent().getExtras().getString("EXTRA_SESSION_Name");
                         Intent intent = new Intent(getActivity().getBaseContext(), ChatActivity.class);
+
+                        intent.putExtra("EXTRA_SESSION_Name", extraFromName);
                         intent.putExtra("chat_title", marker.getTitle());
                         intent.putExtra("chat_subtitle", marker.getSnippet());
                         startActivityForResult(intent, 1);
+
+
                         return true;
                     }
                     else{
@@ -151,7 +156,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
 
 
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gps.getLatitude(), gps.getLongitude()), 2));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(gps.getLatitude(), gps.getLongitude()), 8));
     }
 
     public void addClosestCircle(Double chat_lat, Double chat_lon, Double chat_radius) {
