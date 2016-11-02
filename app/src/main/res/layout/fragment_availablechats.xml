@@ -13,8 +13,15 @@
         android:text="Available Chats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/textView"
+        android:id="@+id/title"
         android:textAlignment="center"
         android:textSize="36sp"
         android:textStyle="normal|bold" />
+
+    <ListView
+        android:id="@+id/available_chats"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp" />
+
 </LinearLayout>

@@ -52,6 +52,9 @@ public class ChatActivity extends AppCompatActivity {
         TextView subTitle = (TextView) findViewById(R.id.chat_subtitle);
         subTitle.setText(extrasubTitle);//subtittle
 
+        //Fazer algo com isto
+        String extraId = getIntent().getStringExtra("chat_id");
+        //Fazer algo com isto
 
         mListView = (ListView) findViewById(R.id.listView);
         mButtonSend = (Button) findViewById(R.id.btn_send);

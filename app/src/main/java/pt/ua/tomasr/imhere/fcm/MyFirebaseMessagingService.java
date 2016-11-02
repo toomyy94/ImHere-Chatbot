@@ -17,6 +17,7 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Map;
 
 import pt.ua.tomasr.imhere.MainActivity;
 import pt.ua.tomasr.imhere.R;
@@ -26,21 +27,56 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "MyGcmListenerService";
 
     @Override
-    public void onMessageReceived(RemoteMessage message) {
+    public void onMessageReceived(RemoteMessage remoteMessage) {
 
-        String image = message.getNotification().getIcon();
-        String title = message.getNotification().getTitle();
-        String text = message.getNotification().getBody();
-        String sound = message.getNotification().getSound();
+        String image = remoteMessage.getNotification().getIcon();
+        String title = remoteMessage.getNotification().getTitle();
+        String text = remoteMessage.getNotification().getBody();
+        String sound = remoteMessage.getNotification().getSound();
 
         int id = 0;
-        Object obj = message.getData().get("id");
+        Object obj = remoteMessage.getData().get("id");
         if (obj != null) {
             id = Integer.valueOf(obj.toString());
         }
 
+        //NEW...
+        Log.d(TAG, "FROM:" + remoteMessage.getFrom());
+
+        //Check if the message contains data
+        if (remoteMessage.getData().size() > 0) {
+            Log.d(TAG, "Message data: " + remoteMessage.getData());
+            Map data = remoteMessage.getData();
+
+            Log.d("op_id",data.get("op_id").toString());
+            switch (data.get("op_id").toString()){
+                case "0":
+                    Intent i = new Intent();
+                    i.putExtra("action",data.get("op_id").toString());
+                    break;
+                case "1":
+                    Intent i1 = new Intent();
+                    i1.putExtra("action",data.get("op_id").toString());
+                    break;
+                case "2":
+                    break;
+                case "3":
+                    break;
+                case "4":
+                    break;
+                case "5":
+                    break;
+            }
+        }
+
+        //Check if the message contains notification
+        if (remoteMessage.getNotification() != null) {
+            Log.d(TAG, "Mesage body:" + remoteMessage.getNotification().getBody());
+        }
+
         this.sendNotification(new NotificationData(image, id, title, text, sound));
     }
+
 
     /**
      * Create and show a simple notification containing the received GCM message.
@@ -61,7 +97,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             notificationBuilder = new NotificationCompat.Builder(this)
                     .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentTitle(URLDecoder.decode(notificationData.getTitle(), "UTF-8"))
+                    .setContentTitle("Firebase Cloud Messaging")//o de baixo
+                    //.setContentTitle(URLDecoder.decode(notificationData.getTitle(), "UTF-8"))
                     .setContentText(URLDecoder.decode(notificationData.getTextMessage(), "UTF-8"))
                     .setAutoCancel(true)
                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))

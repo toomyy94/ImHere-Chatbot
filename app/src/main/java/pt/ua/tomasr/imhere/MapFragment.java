@@ -140,8 +140,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         intent.putExtra("EXTRA_SESSION_Name", extraFromName);
                         intent.putExtra("chat_title", marker.getTitle());
                         intent.putExtra("chat_subtitle", marker.getSnippet());
+                        intent.putExtra("chat_id", a_insidecircles[0].toString());
                         startActivityForResult(intent, 1);
-
 
                         return true;
                     }

@@ -1,13 +1,16 @@
 package pt.ua.tomasr.imhere;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -25,14 +28,22 @@ import android.view.View;
 
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.Marker;
-import com.google.firebase.iid.FirebaseInstanceId;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
 import pt.ua.tomasr.imhere.chat.ChatActivity;
 import pt.ua.tomasr.imhere.modules.LocationCoord;
+import pt.ua.tomasr.imhere.modules.Chat;
+
 
 
 public class MainActivity extends AppCompatActivity
@@ -42,12 +53,20 @@ public class MainActivity extends AppCompatActivity
     private List<Circle> mCircle = new ArrayList<>();
     private List<Marker> mMarkers = new ArrayList<>();
 
+    //0-id ; 1-lat ; 2-lon ; 3-radius
+    ArrayList<Chat> InsideCircle = new ArrayList<Chat>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.i("token: ", FirebaseInstanceId.getInstance().getToken());
+        //Google Auth Info
+        String extraFromName = getIntent().getStringExtra("EXTRA_SESSION_Name");
+        String extraFromEmail = getIntent().getStringExtra("EXTRA_SESSION_Email");
+        String extraFromId = getIntent().getStringExtra("EXTRA_SESSION_Id");
+        Uri extraFromPhoto = getIntent().getData();
+        Log.i("uri",""+extraFromPhoto);
 
 
         //Wifi Manage
@@ -70,11 +89,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        //Google Auth Info
-        String extraFromName = getIntent().getStringExtra("EXTRA_SESSION_Name");
-        String extraFromEmail = getIntent().getStringExtra("EXTRA_SESSION_Email");
-        String extraFromId = getIntent().getStringExtra("EXTRA_SESSION_Id");
-        Uri extraFromPhoto = getIntent().getData();
+
 
         Log.i("Login:",extraFromName+" está logado!");
 
@@ -132,6 +147,12 @@ public class MainActivity extends AppCompatActivity
 
         gps = new LocationCoord(this);
 
+        String URL_insidecircle = "http://192.168.8.217:5011/location/insideCircle?latitude="+gps.getLatitude()+
+                "&longitude="+gps.getLongitude();
+
+        new GETInsideCircle().execute(URL_insidecircle);
+
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -183,12 +204,18 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        //Google Auth Info
+        String tmp_extraFromName = getIntent().getStringExtra("EXTRA_SESSION_Name");
+        String tmp_extraFromEmail = getIntent().getStringExtra("EXTRA_SESSION_Email");
+        String tmp_extraFromId = getIntent().getStringExtra("EXTRA_SESSION_Id");
+        Uri tmp_extraFromPhoto = getIntent().getData();
+
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-
-            AvailableChatsFragment fragment = new AvailableChatsFragment();
+            if (InsideCircle.size()==0) SystemClock.sleep(1500);
+            AvailableChatsFragment fragment = new AvailableChatsFragment(InsideCircle);
             FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
@@ -202,7 +229,13 @@ public class MainActivity extends AppCompatActivity
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
 
-        } else if (id == R.id.nav_commands) {
+        } else if (id == R.id.nav_user) {
+
+            UserProfileFragment fragment = new UserProfileFragment(tmp_extraFromName, tmp_extraFromEmail, tmp_extraFromPhoto);
+            FragmentTransaction fragmentTransaction =
+                    getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_container, fragment);
+            fragmentTransaction.commit();
 
         } else if (id == R.id.nav_share) {
 
@@ -224,5 +257,59 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private class GETInsideCircle extends AsyncTask<String, Void, ArrayList> {
+        private ProgressDialog pDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected ArrayList doInBackground(String... urls) {
+
+            StringBuilder result = new StringBuilder();
+            try {
+                URL url = new URL(urls[0]);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                String line;
+                while ((line = rd.readLine()) != null) {
+                    result.append(line);
+                }
+                rd.close();
+
+                String resultado = result.toString();
+                JSONArray jArray = new JSONArray(resultado);
+
+                for (int i=0; i < jArray.length(); i++) {
+
+                    JSONObject oneObject = jArray.getJSONObject(i);
+
+                    // Pulling items from the Objects
+                    double d_id = oneObject.getDouble("id");
+                    double d_latitude = oneObject.getDouble("latitude");
+                    double d_longitude = oneObject.getDouble("longitude");
+                    double d_radius = oneObject.getDouble("radius");
+
+                    //Add to the list
+                    Chat chat = new Chat(d_id,d_latitude,d_longitude,d_radius);
+                    InsideCircle.add(chat);
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return InsideCircle;
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+        }
+
     }
 }
