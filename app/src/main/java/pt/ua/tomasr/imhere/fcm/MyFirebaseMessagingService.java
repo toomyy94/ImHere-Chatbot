@@ -15,8 +15,6 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.Map;
 
 import pt.ua.tomasr.imhere.MainActivity;
@@ -29,10 +27,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
 
-        String image = remoteMessage.getNotification().getIcon();
-        String title = remoteMessage.getNotification().getTitle();
-        String text = remoteMessage.getNotification().getBody();
-        String sound = remoteMessage.getNotification().getSound();
+//        String image = remoteMessage.getNotification().getIcon();
+//        String title = remoteMessage.getNotification().getTitle();
+//        String text = remoteMessage.getNotification().getBody();
+//        String sound = remoteMessage.getNotification().getSound();
 
         int id = 0;
         Object obj = remoteMessage.getData().get("id");
@@ -48,7 +46,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Log.d(TAG, "Message data: " + remoteMessage.getData());
             Map data = remoteMessage.getData();
 
-            Log.d("op_id",data.get("op_id").toString());
+            Log.d("",data.get("op_id").toString());
             switch (data.get("op_id").toString()){
                 case "0":
                     Intent i = new Intent();
@@ -74,7 +72,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Log.d(TAG, "Mesage body:" + remoteMessage.getNotification().getBody());
         }
 
-        this.sendNotification(new NotificationData(image, id, title, text, sound));
+        //this.sendNotification(new NotificationData(image, id, title, text, sound)); este é o verdadeiro
+        this.sendNotification(new NotificationData());
     }
 
 
@@ -93,20 +92,21 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 PendingIntent.FLAG_ONE_SHOT);
 
         NotificationCompat.Builder notificationBuilder = null;
-        try {
+//        try {
 
             notificationBuilder = new NotificationCompat.Builder(this)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentTitle("Firebase Cloud Messaging")//o de baixo
                     //.setContentTitle(URLDecoder.decode(notificationData.getTitle(), "UTF-8"))
-                    .setContentText(URLDecoder.decode(notificationData.getTextMessage(), "UTF-8"))
+//                    .setContentText(URLDecoder.decode(notificationData.getTextMessage(), "UTF-8"))
+                    .setContentText("cenas")
                     .setAutoCancel(true)
                     .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                     .setContentIntent(pendingIntent);
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
 
         if (notificationBuilder != null) {
             NotificationManager notificationManager =

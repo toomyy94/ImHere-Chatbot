@@ -28,6 +28,7 @@ import android.view.View;
 
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.Marker;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -41,9 +42,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pt.ua.tomasr.imhere.chat.ChatActivity;
-import pt.ua.tomasr.imhere.modules.LocationCoord;
 import pt.ua.tomasr.imhere.modules.Chat;
-
+import pt.ua.tomasr.imhere.modules.LocationCoord;
+import pt.ua.tomasr.imhere.rabitt.MessageBroker;
 
 
 public class MainActivity extends AppCompatActivity
@@ -60,6 +61,24 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //TENTAIVA
+//        FirebaseMessaging fm = FirebaseMessaging.getInstance();
+//        fm.send(new RemoteMessage.Builder(SENDER_ID + "@gcm.googleapis.com")
+//                .setMessageId(Integer.toString(msgId.incrementAndGet()))
+//                .addData("my_message", "Hello World")
+//                .addData("my_action","SAY_HELLO")
+//                .build());
+//      VER!!! ----> TÁ COM O RABBIT
+
+        //OUTRA TENTIVA
+        new RabbitMessage().execute();
+
+        //------------ TA A FUNCIONAR
+        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+        Log.d("Device Token Token: ",refreshedToken);
+
+
 
         //Google Auth Info
         String extraFromName = getIntent().getStringExtra("EXTRA_SESSION_Name");
@@ -99,7 +118,7 @@ public class MainActivity extends AppCompatActivity
             byte[] digest = md.digest();
             String hashedId = Base64.encodeToString(digest,Base64.DEFAULT);
 
-            Log.i("id: ",""+hashedId);
+            Log.i("hash: ",""+hashedId);
         }catch (Exception e){
             Log.e("Erro:","Erro algoritmo de digest Inexistente!");
         }
@@ -305,6 +324,39 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
             return InsideCircle;
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+        }
+
+    }
+
+    private class RabbitMessage extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            MessageBroker msg = new MessageBroker();
+            msg.connect();
+
+            try {
+                //msg.createQueue("hello");
+                //msg.consume("hello");
+                //msg.publish("hello", "Please work");
+                msg.publish("hello","{\"op_id\":1,\"user_id\":\"edrftgyhujkasd\",\"create_chat\":\"Festival Super Bock Super Rock\"}");
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.e("error","ERRO RABBIT");
+            }
+
+            return "ola";
         }
 
         protected void onPostExecute(Boolean result) {
