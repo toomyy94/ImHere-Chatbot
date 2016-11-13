@@ -128,7 +128,6 @@ public class SignInActivity extends AppCompatActivity implements
         //mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
         updateUI(true);
 
-
         //Get Infos
         String personName = acct.getDisplayName();
         String personEmail = acct.getEmail();

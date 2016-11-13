@@ -35,11 +35,9 @@ public class Chat {
     public void setId(Double id){
         this.id=id;
     }
-
     public void setLat(Double lat){
         this.lat=lat;
     }
-
     public void setLon(Double lon){
         this.lon=lon;
     }

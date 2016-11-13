@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import pt.ua.tomasr.imhere.R;
+import pt.ua.tomasr.imhere.rabitt.MessageBroker;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -34,6 +35,12 @@ public class ChatActivity extends AppCompatActivity {
     private EditText mEditTextMessage;
     private ImageView mImageView;
     private String mensagem_do_bot="Bot: ";
+
+    //Rabbit parameters
+    String hash = "";
+    String user_id = "";
+    String extraTitle = "";
+    String chat_id = "";
 
 
     private ChatMessageAdapter mAdapter;
@@ -44,13 +51,17 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.chat);
 
         //Extras
-        String extraTitle = getIntent().getStringExtra("chat_title");
+        extraTitle = getIntent().getStringExtra("chat_title");
         TextView Title = (TextView) findViewById(R.id.chat_title);
         Title.setText(extraTitle); //tittle
 
         String extrasubTitle = getIntent().getStringExtra("chat_subtitle");
         TextView subTitle = (TextView) findViewById(R.id.chat_subtitle);
         subTitle.setText(extrasubTitle);//subtittle
+
+        hash = getIntent().getStringExtra("EXTRA_SESSION_Hash");
+        user_id = getIntent().getStringExtra("EXTRA_SESSION_Email");
+        chat_id = getIntent().getStringExtra("chat_id");
 
         //Fazer algo com isto
         String extraId = getIntent().getStringExtra("chat_id");
@@ -78,6 +89,9 @@ public class ChatActivity extends AppCompatActivity {
                 }
                 sendMessage(extraFromName+": "+message);
                 mEditTextMessage.setText("");
+
+                //Rabbit message
+                new RabbitSendMessage().execute(message);
 
                 //ChatBot
                 if(message.startsWith("@")) {
@@ -198,6 +212,40 @@ public class ChatActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             return mensagem_do_bot;
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+        }
+
+    }
+
+    private class RabbitSendMessage extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            MessageBroker msg = new MessageBroker();
+            msg.connect();
+
+            try {
+
+                String mensagem = "{\"op_id\":2,\"hash\":\""+hash+"\",\"chat_id\":\""+chat_id+"\",\"msg\":\""+urls[0]+"\"}";
+
+                msg.publish("hello",mensagem);
+
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.e("error","ERRO RABBIT");
+            }
+
+            return "";
         }
 
         protected void onPostExecute(Boolean result) {

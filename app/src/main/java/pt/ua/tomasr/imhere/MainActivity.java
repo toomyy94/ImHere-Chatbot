@@ -57,36 +57,34 @@ public class MainActivity extends AppCompatActivity
     //0-id ; 1-lat ; 2-lon ; 3-radius
     ArrayList<Chat> InsideCircle = new ArrayList<Chat>();
 
+    //Google Auth Info
+    String g_extraFromName = "";
+    String g_extraFromEmail = "";
+    String g_extraFromId = "";
+
+    //Messages
+    String hash = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //TENTAIVA
-//        FirebaseMessaging fm = FirebaseMessaging.getInstance();
-//        fm.send(new RemoteMessage.Builder(SENDER_ID + "@gcm.googleapis.com")
-//                .setMessageId(Integer.toString(msgId.incrementAndGet()))
-//                .addData("my_message", "Hello World")
-//                .addData("my_action","SAY_HELLO")
-//                .build());
-//      VER!!! ----> TÁ COM O RABBIT
+        //Google Auth Info
+        String extraFromName = getIntent().getStringExtra("EXTRA_SESSION_Name");
+        final String extraFromEmail = getIntent().getStringExtra("EXTRA_SESSION_Email");
+        String extraFromId = getIntent().getStringExtra("EXTRA_SESSION_Id");
+        Uri extraFromPhoto = getIntent().getData();
 
-        //OUTRA TENTIVA
-        new RabbitMessage().execute();
+        //para o rabbit
+        g_extraFromEmail = extraFromEmail;
+
+        //Login Message
+        new RabbitLoginMessage().execute();
 
         //------------ TA A FUNCIONAR
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-        Log.d("Device Token Token: ",refreshedToken);
-
-
-
-        //Google Auth Info
-        String extraFromName = getIntent().getStringExtra("EXTRA_SESSION_Name");
-        String extraFromEmail = getIntent().getStringExtra("EXTRA_SESSION_Email");
-        String extraFromId = getIntent().getStringExtra("EXTRA_SESSION_Id");
-        Uri extraFromPhoto = getIntent().getData();
-        Log.i("uri",""+extraFromPhoto);
-
+        Log.d("Device Token: ",refreshedToken);
 
         //Wifi Manage
         WifiManager wifi;
@@ -100,7 +98,15 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                Bundle bundle = new Bundle();
+                bundle.putString("hash", hash );
+                bundle.putString("user_id", extraFromEmail );
+
                 CreateChatFragment fragment = new CreateChatFragment(gps);
+                //args
+                fragment.setArguments(bundle);
+                //-----
                 FragmentTransaction fragmentTransaction =
                         getSupportFragmentManager().beginTransaction();
                 fragmentTransaction.replace(R.id.fragment_container, fragment);
@@ -108,17 +114,19 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
-
         Log.i("Login:",extraFromName+" está logado!");
 
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(extraFromId.getBytes("UTF-16")); // Change this to "UTF-16" if needed
             byte[] digest = md.digest();
-            String hashedId = Base64.encodeToString(digest,Base64.DEFAULT);
+            final String hashedId = Base64.encodeToString(digest,Base64.DEFAULT);
+            hash = hashedId;
+            hash = hash.replace("\n","");
 
-            Log.i("hash: ",""+hashedId);
+            Log.i("hash: ",""+hash);
+
+            //Passar cenas aos fragmentos
         }catch (Exception e){
             Log.e("Erro:","Erro algoritmo de digest Inexistente!");
         }
@@ -234,7 +242,15 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_home) {
             if (InsideCircle.size()==0) SystemClock.sleep(1500);
+
+            Bundle bundle = new Bundle();
+            bundle.putString("hash", hash );
+            bundle.putString("user_id", tmp_extraFromEmail );
+
             AvailableChatsFragment fragment = new AvailableChatsFragment(InsideCircle);
+            //args
+            fragment.setArguments(bundle);
+            //-----
             FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
@@ -242,7 +258,14 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_map) {
 
+            Bundle bundle = new Bundle();
+            bundle.putString("hash", hash );
+            bundle.putString("user_id", tmp_extraFromEmail );
+
             MapFragment fragment = new MapFragment(gps);
+            //args
+            fragment.setArguments(bundle);
+            //-----
             FragmentTransaction fragmentTransaction =
                     getSupportFragmentManager().beginTransaction();
             fragmentTransaction.replace(R.id.fragment_container, fragment);
@@ -332,7 +355,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private class RabbitMessage extends AsyncTask<String, Void, String> {
+    private class RabbitLoginMessage extends AsyncTask<String, Void, String> {
 
         @Override
         protected void onPreExecute() {
@@ -350,13 +373,18 @@ public class MainActivity extends AppCompatActivity
                 //msg.createQueue("hello");
                 //msg.consume("hello");
                 //msg.publish("hello", "Please work");
-                msg.publish("hello","{\"op_id\":1,\"user_id\":\"edrftgyhujkasd\",\"create_chat\":\"Festival Super Bock Super Rock\"}");
+                String login = "{\"op_id\":0,\"user_id\":\""+g_extraFromEmail+"\",\"hash\":\""+hash+"\"}";
+
+                msg.publish("hello",login);
+                SystemClock.sleep(1500);
+                msg.consume(hash);
+
             }catch (Exception e){
                 e.printStackTrace();
                 Log.e("error","ERRO RABBIT");
             }
 
-            return "ola";
+            return "";
         }
 
         protected void onPostExecute(Boolean result) {

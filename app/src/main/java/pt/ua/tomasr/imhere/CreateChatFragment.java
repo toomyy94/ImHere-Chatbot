@@ -6,6 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -41,6 +42,7 @@ import java.util.HashMap;
 
 import pt.ua.tomasr.imhere.modules.ApplicationController;
 import pt.ua.tomasr.imhere.modules.LocationCoord;
+import pt.ua.tomasr.imhere.rabitt.MessageBroker;
 
 /**
  * @author Tomás Rodrigues (tomasrodrigues@ua.pt)
@@ -51,6 +53,16 @@ import pt.ua.tomasr.imhere.modules.LocationCoord;
 public class CreateChatFragment extends Fragment {
 
     private LocationCoord gps;
+
+    //Rabbit parameters
+    String hash = "";
+    String user_id = "";
+    String str_chat_name = "";
+    String str_chat_description = "";
+    Double str_chat_radius = 100.0;
+    Double str_chat_time = 5.0;
+    String str_evento = "";
+    int geo_id = 0;
 
     public CreateChatFragment(LocationCoord gps) {
         this.gps=gps;
@@ -70,21 +82,10 @@ public class CreateChatFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_createchat,
                 container, false);
 
-        //Public checkbox
-//        CompoundButton.OnCheckedChangeListener myCheckboxListener = new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                switch (buttonView.getId()) {
-//                    case R.id.checkBox_public:
-//                        if (isChecked == false) {
-//                            TextView chatpassword = (TextView) view.findViewById(R.id.chat_password);
-//
-//                            buttonView.setText("Private");
-//                            chatpassword.setVisibility(View.VISIBLE);
-//                        }
-//                }
-//            }
-//        };
+        Bundle bundle = this.getArguments();
+        user_id = bundle.getString("user_id");
+        hash = bundle.getString("hash");
+
 
         //Submit Button
         Button btn = (Button) view.findViewById(R.id.submit_chat);
@@ -104,13 +105,13 @@ public class CreateChatFragment extends Fragment {
                 EditText chat_password = (EditText) frag.findViewById(R.id.chat_password);
                 Spinner evento = (Spinner) frag.findViewById(R.id.evento);
                 //Get Tetx's
-                String str_chat_name = chat_name.getText().toString();
-                String str_chat_description = chat_description.getText().toString();
-                Double str_chat_radius = 100.0;
-                Double str_chat_time = 5.0;
-                Boolean str_checkBox_public = checkBox_public.isChecked();
-                String str_chat_password = chat_password.getText().toString();
-                String str_evento = evento.getSelectedItem().toString();
+                str_chat_name = chat_name.getText().toString();
+                str_chat_description = chat_description.getText().toString();
+                str_chat_radius = 100.0;
+                str_chat_time = 5.0;
+//                str_checkBox_public = checkBox_public.isChecked();
+//                str_chat_password = chat_password.getText().toString();
+                str_evento = evento.getSelectedItem().toString();
 
                 String url = "http://192.168.8.217:5011/location/point";
                 str_chat_radius = Double.parseDouble(chat_radius.getText().toString());
@@ -127,7 +128,9 @@ public class CreateChatFragment extends Fragment {
                             @Override
                             public void onResponse(JSONObject response) {
                                 try {
-                                    VolleyLog.v("Response:%n %s", response.toString(4));
+                                    geo_id = response.getInt("id");
+                                    new RabbitCreateChat().execute();
+
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -143,26 +146,16 @@ public class CreateChatFragment extends Fragment {
                 // add the request object to the queue to be executed
                 ApplicationController.getInstance().addToRequestQueue(req);
 
-//                try {
-//                    str_chat_radius = Double.parseDouble(chat_radius.getText().toString());
-//
-////                    post("http://192.168.8.217:5011/location/point",
-////                            "{\"latitude\":"+gps.getLatitude()+", \"longitude\":"+gps.getLatitude()+", \"radius\":"+str_chat_radius+"}");
-//                    new PostJson().execute("http://192.168.8.217:5011/location/point",str_chat_radius.toString());
-//
-//                } catch (Exception e) {
-//                    Log.e("erro","Radius n é um Double ou Erro no Post");
-//
-//                    Fragment MapFragment = new MapFragment(gps);
-//                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
-//                    transaction.replace(R.id.fragment_container, MapFragment); // give your fragment container id in first parameter
-//                    transaction.addToBackStack(null);  // if written, this transaction will be added to backstack
-//                    transaction.commit();
-//               }
-
                 //Voltar ao mapa
                 //Fragment MapFragment = new MapFragment(gps, str_chat_name, str_chat_description, str_chat_radius, str_chat_time, str_checkBox_public, str_chat_password, str_evento);
+                SystemClock.sleep(1000);
+                Bundle bundle = new Bundle();
+                bundle.putString("hash", hash );
+
                 Fragment MapFragment = new MapFragment(gps);
+                //args
+                MapFragment.setArguments(bundle);
+                //-----
                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragment_container, MapFragment); // give your fragment container id in first parameter
                 transaction.addToBackStack(null);  // if written, this transaction will be added to backstack
@@ -174,6 +167,41 @@ public class CreateChatFragment extends Fragment {
         return view;
     }
 
+    private class RabbitCreateChat extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            MessageBroker msg = new MessageBroker();
+            msg.connect();
+
+            try {
+                String mensagem = "{\"op_id\":1,\"hash\":\""+hash+"\",\"chat_id\":\""+geo_id+"\"," +
+                        "\"chat_name\":\""+str_chat_name+"\",\"chat_description\":\""+str_chat_description+"\"," +
+                        "\"chat_time\":\""+str_chat_time+"\",\"chat_event\":\""+str_evento+"\"}";
+
+                msg.publish("hello",mensagem);
+
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.e("error","ERRO RABBIT");
+            }
+
+            return "";
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+        }
+
+    }
+
     public boolean isConnected(){
         ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Activity.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
@@ -183,6 +211,9 @@ public class CreateChatFragment extends Fragment {
             return false;
     }
 
+
+    //Daqui para baixo é só JAJÃO!!!
+    //----------------------------
     private class PostJson extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {

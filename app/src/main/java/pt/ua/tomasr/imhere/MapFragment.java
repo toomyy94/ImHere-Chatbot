@@ -37,6 +37,7 @@ import java.util.List;
 
 import pt.ua.tomasr.imhere.chat.ChatActivity;
 import pt.ua.tomasr.imhere.modules.LocationCoord;
+import pt.ua.tomasr.imhere.rabitt.MessageBroker;
 
 import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_BLUE;
 import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_GREEN;
@@ -65,6 +66,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     //Gets
     ArrayList<Double> ClosestPoints = new ArrayList<Double>();
     ArrayList<Double> InsideCircle = new ArrayList<Double>();
+
+    //Rabbit parameters
+    String hash = "";
+    String user_id = "";
 
     //Variaveis adicionais(create chat)
       private String chat_name, chat_description, chat_password, event_type;
@@ -98,6 +103,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         View v = inflater.inflate(R.layout.fragment_map, container, false);
         SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.mapa);
         mapFragment.getMapAsync(this);
+
+        Bundle bundle = this.getArguments();
+        hash = bundle.getString("hash");
 
         return v;
     }
@@ -134,13 +142,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     if(marker.getPosition().equals(circulos)) {
                         Log.i("posicao","circulo perto, entrei");
 
+                        new RabbitJoinChat().execute(a_insidecircles[i].toString());
+
                         String extraFromName = getActivity().getIntent().getExtras().getString("EXTRA_SESSION_Name");
+                        String extraFromEmail = getActivity().getIntent().getExtras().getString("EXTRA_SESSION_Email");
+
                         Intent intent = new Intent(getActivity().getBaseContext(), ChatActivity.class);
 
                         intent.putExtra("EXTRA_SESSION_Name", extraFromName);
+                        intent.putExtra("EXTRA_SESSION_Email", extraFromEmail);
+                        intent.putExtra("EXTRA_SESSION_Hash", hash);
                         intent.putExtra("chat_title", marker.getTitle());
                         intent.putExtra("chat_subtitle", marker.getSnippet());
-                        intent.putExtra("chat_id", a_insidecircles[0].toString());
+                        intent.putExtra("chat_id", a_insidecircles[i].toString());
                         startActivityForResult(intent, 1);
 
                         return true;
@@ -239,6 +253,40 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         double dist = (double) (earthRadius * c);
 
         return dist;
+    }
+
+    private class RabbitJoinChat extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            MessageBroker msg = new MessageBroker();
+            msg.connect();
+
+            try {
+                //HARDCODE - VER!!!
+                chat_name = "teste";
+                String mensagem = "{\"op_id\":4,\"hash\":\""+hash+"\",\"chat_id\":\""+urls[0]+"\"}";
+                msg.publish("hello",mensagem);
+
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.e("error","ERRO RABBIT");
+            }
+
+            return "";
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+        }
+
     }
 
 

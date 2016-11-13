@@ -10,6 +10,9 @@ import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -44,16 +47,36 @@ public class MessageBroker {
     
     public void publish(String queue_name, String message) throws IOException{
         channel.basicPublish("", queue_name, null, message.getBytes());
-        Log.i("teste1 "," [x] Sent '" + message + "'");
+        Log.i("Rabbit publish",""+message);
     }
     
     public void consume(String queue_name) throws IOException{
         Consumer consumer = new DefaultConsumer(channel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
-                throws IOException {
-              String message = new String(body, "UTF-8");
-              Log.i("teste2: "," [x] Received '" + message + "'");
+                    throws IOException {
+
+                try {
+                    int error = -1;
+
+                    String message = new String(body, "UTF-8");
+                    JSONObject obj = new JSONObject(message);
+                    if(obj.getInt("op_id")==0) imprime_data(obj);
+                    else if(obj.getInt("op_id")==1){
+                        error = obj.getInt("response_id");
+                        if(error==0) imprime_data(obj);
+                        else imprime_error(obj);
+                    }
+                    else if(obj.getInt("op_id")==2) imprime_data(obj);
+                    else if(obj.getInt("op_id")==4) imprime_data(obj);
+                    else if(obj.getInt("op_id")==8) imprime_data(obj);
+                    else imprime_data(obj);
+
+                }catch(JSONException e){
+                    e.printStackTrace();
+                    Log.e("erro","Rabbit - JSON Exception");
+
+                }
             }
         };
         channel.basicConsume(queue_name, true, consumer);
@@ -65,6 +88,14 @@ public class MessageBroker {
     
     public void closeConnection() throws IOException{
         connection.close();
+    }
+
+    public void imprime_data(JSONObject obj) throws JSONException{
+        Log.i("Rabbbit data",""+obj.getString("response_id"));
+    }
+
+    public void imprime_error(JSONObject obj) throws JSONException{
+        Log.i("Rabbbit data",""+obj.getString("response_id"));
     }
     
 }

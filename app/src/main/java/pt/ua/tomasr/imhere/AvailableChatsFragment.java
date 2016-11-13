@@ -2,8 +2,10 @@ package pt.ua.tomasr.imhere;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,11 +16,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import pt.ua.tomasr.imhere.chat.ChatActivity;
 import pt.ua.tomasr.imhere.modules.Chat;
+import pt.ua.tomasr.imhere.rabitt.MessageBroker;
 
 /**
  * @author Tomás Rodrigues (tomasrodrigues@ua.pt)
@@ -29,16 +34,20 @@ import pt.ua.tomasr.imhere.modules.Chat;
 public class AvailableChatsFragment extends Fragment {
 
     List<Chat> insideCircle = new ArrayList<Chat>();
+    ArrayList<Double> ids = new ArrayList();
+
+    //Rabbit parameters
+    String hash = "";
+    String user_id = "";
 
     public AvailableChatsFragment() {}
-    public AvailableChatsFragment(ArrayList<Chat> insideCircle) {
+    public AvailableChatsFragment(List<Chat> insideCircle) {
         this.insideCircle = insideCircle;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
 
@@ -50,10 +59,19 @@ public class AvailableChatsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_availablechats,
                 container, false);
 
+        Bundle bundle = this.getArguments();
+        hash = bundle.getString("hash");
+
+        new RabbitGetChatInfo().execute();
+
         //Customized List
         ArrayAdapter<Chat> adapter = new MyListAdapter();
         ListView list = (ListView) view.findViewById(R.id.available_chats);
         list.setAdapter(adapter);
+
+        for (Chat tmp:insideCircle) {
+            ids.add(tmp.getID());
+        }
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -102,20 +120,56 @@ public class AvailableChatsFragment extends Fragment {
             ImageView imageView = (ImageView)itemView.findViewById(R.id.item_icon);
             //set...
 
-            // Make:
+            // Direita:
             TextView radiusText = (TextView) itemView.findViewById(R.id.item_txtRadius);
             radiusText.setText("Radius: "+chat.getRadius().toString());
 
-            // Year:
+            // Esquerda/cima:
             TextView latText = (TextView) itemView.findViewById(R.id.item_txtLat);
             latText.setText("Lat: "+chat.getLat().toString());
 
-            // Condition:
+            // Esquerda/Baixo:
             TextView lonText = (TextView) itemView.findViewById(R.id.item_txtLon);
             lonText.setText("Lon: "+chat.getLon().toString());
 
             return itemView;
         }
+    }
+
+    private class RabbitGetChatInfo extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            MessageBroker msg = new MessageBroker();
+            msg.connect();
+
+            try {
+                JSONObject obj = new JSONObject();
+
+                String mensagem = "{\"op_id\":8,\"hash\":\""+hash+"\",\"chat_id\":"+ids+"}";
+
+                msg.publish("hello",mensagem);
+                //SystemClock.sleep(2000);
+
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.e("error","ERRO RABBIT");
+            }
+
+            return "";
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+        }
+
     }
 
 
