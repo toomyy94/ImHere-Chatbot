@@ -70,6 +70,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     //Rabbit parameters
     String hash = "";
     String user_id = "";
+    MessageBroker msg = new MessageBroker();
 
     //Variaveis adicionais(create chat)
       private String chat_name, chat_description, chat_password, event_type;
@@ -115,7 +116,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         mMap = googleMap;
 
         googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-        if(ClosestPoints==null || ClosestPoints.size()==0) SystemClock.sleep(2500);
+        if(ClosestPoints==null || ClosestPoints.size()==0) SystemClock.sleep(2000);
         Log.i("json",""+ClosestPoints);
         Double[] a_closests = ClosestPoints.toArray(new Double[ClosestPoints.size()]);
 
@@ -159,12 +160,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
                         return true;
                     }
-                    else{
-                        Log.i("posicao","Esse chat está demasiado longe!");
-                        Toast.makeText(getActivity(),"Esse chat está demasiado longe!", Toast.LENGTH_SHORT).show();
-                    }
 
                 }
+                //ELSE - ESTÁ DEMASIADO LONGE
+                Toast.makeText(getActivity(),"Esse chat está demasiado longe!", Toast.LENGTH_SHORT).show();
+                Log.i("posicao","Esse chat está demasiado longe!");
+
                 return false;
             }
         });

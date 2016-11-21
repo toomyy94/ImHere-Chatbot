@@ -4,14 +4,14 @@ package pt.ua.tomasr.imhere.modules;
  * Created by reytm on 02/11/2016.
  */
 
-public class Chat {
+public class GeoChat {
     private Double id;
     private Double lat;
     private Double lon;
     private Double radius;
 
 
-    public Chat(Double id, Double lat, Double lon, Double radius) {
+    public GeoChat(Double id, Double lat, Double lon, Double radius) {
         super();
         this.id = id;
         this.lat = lat;

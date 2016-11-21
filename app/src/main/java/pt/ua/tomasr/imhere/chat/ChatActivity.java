@@ -17,6 +17,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -36,7 +37,11 @@ public class ChatActivity extends AppCompatActivity {
     private ImageView mImageView;
     private String mensagem_do_bot="Bot: ";
 
+    //messges
+    public static ArrayList<String> chatmessages = new ArrayList<String>();
+
     //Rabbit parameters
+    public MessageBroker msg = new MessageBroker();
     String hash = "";
     String user_id = "";
     String extraTitle = "";
@@ -49,6 +54,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
+
 
         //Extras
         extraTitle = getIntent().getStringExtra("chat_title");
@@ -116,6 +122,21 @@ public class ChatActivity extends AppCompatActivity {
                 sendMessage();
             }
         });
+
+        //historico de mensagens
+        chatmessages.clear();
+        try {
+            if(msg.getChatMessages().size()==0)SystemClock.sleep(2500);
+            chatmessages = msg.getChatMessages();
+            Log.i("messages",chatmessages.toString());
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+
+        //enviar para chat
+        for(int i=0; i<chatmessages.size();i++){
+            sendMessage(chatmessages.get(i));
+        }
 
     }
 

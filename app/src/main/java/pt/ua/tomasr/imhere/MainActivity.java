@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pt.ua.tomasr.imhere.chat.ChatActivity;
-import pt.ua.tomasr.imhere.modules.Chat;
+import pt.ua.tomasr.imhere.modules.GeoChat;
 import pt.ua.tomasr.imhere.modules.LocationCoord;
 import pt.ua.tomasr.imhere.rabitt.MessageBroker;
 
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private List<Marker> mMarkers = new ArrayList<>();
 
     //0-id ; 1-lat ; 2-lon ; 3-radius
-    ArrayList<Chat> InsideCircle = new ArrayList<Chat>();
+    ArrayList<GeoChat> InsideCircle = new ArrayList<GeoChat>();
 
     //Google Auth Info
     String g_extraFromName = "";
@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity
         if (!gps_enabled && !network_enabled) {
             // notify user
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-            dialog.setMessage("Allow LivingCity to access this device's location?");
+            dialog.setMessage("Allow ImHere to access this device's location?");
             dialog.setPositiveButton("Allow", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface paramDialogInterface, int paramInt) {
@@ -173,11 +173,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         gps = new LocationCoord(this);
-
-        String URL_insidecircle = "http://192.168.8.217:5011/location/insideCircle?latitude="+gps.getLatitude()+
-                "&longitude="+gps.getLongitude();
-
-        new GETInsideCircle().execute(URL_insidecircle);
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -241,6 +236,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
+            String URL_insidecircle = "http://192.168.8.217:5011/location/insideCircle?latitude="+gps.getLatitude()+
+                    "&longitude="+gps.getLongitude();
+
+            new GETInsideCircle().execute(URL_insidecircle);
+
             if (InsideCircle.size()==0) SystemClock.sleep(1500);
 
             Bundle bundle = new Bundle();
@@ -328,6 +328,8 @@ public class MainActivity extends AppCompatActivity
                 String resultado = result.toString();
                 JSONArray jArray = new JSONArray(resultado);
 
+                InsideCircle.clear();
+
                 for (int i=0; i < jArray.length(); i++) {
 
                     JSONObject oneObject = jArray.getJSONObject(i);
@@ -339,8 +341,8 @@ public class MainActivity extends AppCompatActivity
                     double d_radius = oneObject.getDouble("radius");
 
                     //Add to the list
-                    Chat chat = new Chat(d_id,d_latitude,d_longitude,d_radius);
-                    InsideCircle.add(chat);
+                    GeoChat geoChat = new GeoChat(d_id,d_latitude,d_longitude,d_radius);
+                    InsideCircle.add(geoChat);
 
                 }
             } catch (Exception e) {

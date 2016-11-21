@@ -10,19 +10,25 @@ import com.rabbitmq.client.Consumer;
 import com.rabbitmq.client.DefaultConsumer;
 import com.rabbitmq.client.Envelope;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import pt.ua.tomasr.imhere.modules.InfoChat;
 
 public class MessageBroker {
     private final static String QUEUE_NAME = "hello";
     private Channel channel;
     private Connection connection;
 
+    public static ArrayList<InfoChat> chatinfos = new ArrayList<InfoChat>();
+    public static ArrayList<String> chatmessages = new ArrayList<String>();
 
     public void connect(){
         try {
@@ -57,20 +63,21 @@ public class MessageBroker {
                     throws IOException {
 
                 try {
-                    int error = -1;
 
                     String message = new String(body, "UTF-8");
                     JSONObject obj = new JSONObject(message);
-                    if(obj.getInt("op_id")==0) imprime_data(obj);
-                    else if(obj.getInt("op_id")==1){
-                        error = obj.getInt("response_id");
-                        if(error==0) imprime_data(obj);
-                        else imprime_error(obj);
+                    if(obj.getInt("op_id")==0)/*LOGIN*/ imprime_error(obj);
+                    else if(obj.getInt("op_id")==1)/*CREATE CHAT*/{imprime_error(obj);}
+                    else if(obj.getInt("op_id")==2)/*SEND MESSAGE*/ imprime_error(obj);
+                    else if(obj.getInt("op_id")==4)/*JOIN CHAT*/ {
+                        chatmessages = parseMessages(obj);
+                        imprime_error(obj);
                     }
-                    else if(obj.getInt("op_id")==2) imprime_data(obj);
-                    else if(obj.getInt("op_id")==4) imprime_data(obj);
-                    else if(obj.getInt("op_id")==8) imprime_data(obj);
-                    else imprime_data(obj);
+                    else if(obj.getInt("op_id")==8)/*GET CHAT INFO*/ {
+                        chatinfos = parseAvailableChats(obj);
+                        imprime_data(obj);
+                    }
+
 
                 }catch(JSONException e){
                     e.printStackTrace();
@@ -91,11 +98,63 @@ public class MessageBroker {
     }
 
     public void imprime_data(JSONObject obj) throws JSONException{
-        Log.i("Rabbbit data",""+obj.getString("response_id"));
+        Log.i("Rabbbit data",""+obj.getString("data"));
     }
 
     public void imprime_error(JSONObject obj) throws JSONException{
         Log.i("Rabbbit data",""+obj.getString("response_id"));
+    }
+
+    public ArrayList<InfoChat> getChatInfos() throws JSONException{
+        return chatinfos;
+    }
+
+    public ArrayList<String> getChatMessages() throws JSONException{
+        return chatmessages;
+    }
+
+    public ArrayList<InfoChat> parseAvailableChats(JSONObject obj) throws JSONException{
+
+        JSONArray jArray = obj.getJSONArray("data");
+
+        for (int i=0; i < jArray.length(); i++) {
+
+            JSONObject oneObject = jArray.getJSONObject(i);
+
+            // Pulling items from the Objects
+            Integer id = oneObject.getInt("chat_id");
+            String name = oneObject.getString("chat_name");
+            String description = oneObject.getString("chat_description");
+            String time = oneObject.getString("chat_time");
+            String event = oneObject.getString("chat_event");
+
+            //Add to the list
+            InfoChat infoChat = new InfoChat(id,name,description,time,event);
+            chatinfos.add(infoChat);
+        }
+
+        return chatinfos;
+
+    }
+
+    public ArrayList<String> parseMessages(JSONObject obj) throws JSONException{
+
+        JSONArray jArray = obj.getJSONArray("data");
+
+        for (int i=0; i < jArray.length(); i++) {
+
+            JSONObject oneObject = jArray.getJSONObject(i);
+
+            // Pulling items from the Objects
+            String msg = oneObject.getString("message");
+
+            //Add to the list
+            chatmessages.add(msg);
+        }
+        Log.i("msg",""+chatmessages);
+
+        return chatmessages;
+
     }
     
 }

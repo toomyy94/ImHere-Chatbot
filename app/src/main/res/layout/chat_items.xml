@@ -15,15 +15,6 @@
         android:src="@drawable/logo" />
 
     <TextView
-        android:id="@+id/item_txtLon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/item_icon"
-        android:layout_marginBottom="16dp"
-        android:text="2000"
-        android:layout_toEndOf="@+id/item_icon" />
-
-    <TextView
         android:id="@+id/item_txtLat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,12 +24,22 @@
         android:layout_marginTop="14dp" />
 
     <TextView
+        android:id="@+id/item_txtLon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2000"
+        android:layout_alignBottom="@+id/item_icon"
+        android:layout_toEndOf="@+id/item_icon"
+        android:layout_marginBottom="14dp" />
+
+    <TextView
         android:id="@+id/item_txtRadius"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Condition shown here"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_above="@+id/item_txtLon"
+        android:textSize="15sp"
+        android:layout_alignBottom="@+id/item_txtLon"
         android:layout_alignParentEnd="true" />
 
 </RelativeLayout>
