@@ -46,7 +46,6 @@ import pt.ua.tomasr.imhere.modules.GeoChat;
 import pt.ua.tomasr.imhere.modules.LocationCoord;
 import pt.ua.tomasr.imhere.rabitt.MessageBroker;
 
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -61,9 +60,11 @@ public class MainActivity extends AppCompatActivity
     String g_extraFromName = "";
     String g_extraFromEmail = "";
     String g_extraFromId = "";
+    String device_token = "";
 
     //Messages
     String hash = "";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,20 +72,21 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         //Google Auth Info
-        String extraFromName = getIntent().getStringExtra("EXTRA_SESSION_Name");
+        final String extraFromName = getIntent().getStringExtra("EXTRA_SESSION_Name");
         final String extraFromEmail = getIntent().getStringExtra("EXTRA_SESSION_Email");
         String extraFromId = getIntent().getStringExtra("EXTRA_SESSION_Id");
         Uri extraFromPhoto = getIntent().getData();
 
         //para o rabbit
         g_extraFromEmail = extraFromEmail;
+        g_extraFromName = extraFromName;
 
         //Login Message
         new RabbitLoginMessage().execute();
 
         //------------ TA A FUNCIONAR
-        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-        Log.d("Device Token: ",refreshedToken);
+        device_token = FirebaseInstanceId.getInstance().getToken();
+        Log.d("Device Token: ",device_token);
 
         //Wifi Manage
         WifiManager wifi;
@@ -218,6 +220,11 @@ public class MainActivity extends AppCompatActivity
 
             Intent intent = new Intent(getBaseContext(), SignInActivity.class);
             startActivityForResult(intent, 1);
+        }
+        else if(id == R.id.action_slack) {
+
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://slack.com/oauth/authorize?scope=identity.basic&client_id=89179064241.89178516167"));
+            startActivity(browserIntent);
         }
 
         return super.onOptionsItemSelected(item);
@@ -375,7 +382,7 @@ public class MainActivity extends AppCompatActivity
                 //msg.createQueue("hello");
                 //msg.consume("hello");
                 //msg.publish("hello", "Please work");
-                String login = "{\"op_id\":0,\"user_id\":\""+g_extraFromEmail+"\",\"hash\":\""+hash+"\"}";
+                String login = "{\"op_id\":0,\"user_id\":\""+g_extraFromEmail+"\",\"user_name\":\""+g_extraFromName+"\",\"hash\":\""+hash+"\",\"device_token\":\""+device_token+"\"}";
 
                 msg.publish("hello",login);
                 SystemClock.sleep(1500);

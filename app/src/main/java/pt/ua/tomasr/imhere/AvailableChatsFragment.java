@@ -57,7 +57,6 @@ public class AvailableChatsFragment extends Fragment {
 
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -83,6 +82,7 @@ public class AvailableChatsFragment extends Fragment {
             }
 
             ids_info.clear();
+            if(msg.getChatInfos().size()==0)SystemClock.sleep(1500);
             for (InfoChat tmp:msg.getChatInfos()) {
 
                 ids_info.add(tmp.getID());
@@ -94,6 +94,8 @@ public class AvailableChatsFragment extends Fragment {
                                         int position, long id) {
 
                     GeoChat geoChat = insideCircle.get(position);
+
+                    new RabbitJoinChat().execute(geoChat.getID().toString());
 
                     try{
                         InfoChat infoChat = msg.getChatInfos().get(position);
@@ -234,6 +236,38 @@ public class AvailableChatsFragment extends Fragment {
 
             return itemView;
         }
+    }
+
+    private class RabbitJoinChat extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            MessageBroker msg = new MessageBroker();
+            msg.connect();
+
+            try {
+                String mensagem = "{\"op_id\":4,\"hash\":\""+hash+"\",\"chat_id\":\""+urls[0]+"\"}";
+                msg.publish("hello",mensagem);
+
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.e("error","ERRO RABBIT");
+            }
+
+            return "";
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+        }
+
     }
 
     private class RabbitGetChatInfo extends AsyncTask<String, Void, String> {

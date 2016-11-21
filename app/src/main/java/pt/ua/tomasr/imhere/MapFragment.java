@@ -271,8 +271,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             msg.connect();
 
             try {
-                //HARDCODE - VER!!!
-                chat_name = "teste";
                 String mensagem = "{\"op_id\":4,\"hash\":\""+hash+"\",\"chat_id\":\""+urls[0]+"\"}";
                 msg.publish("hello",mensagem);
 

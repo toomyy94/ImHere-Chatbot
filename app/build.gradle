@@ -44,6 +44,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-gcm:9.6.1'
     compile 'com.google.firebase:firebase-core:9.6.1'
     compile 'com.google.firebase:firebase-messaging:9.6.1'
+
     compile project(':volley')
     compile files('libs/commons-cli-1.1.jar')
     compile files('libs/commons-io-1.2.jar')

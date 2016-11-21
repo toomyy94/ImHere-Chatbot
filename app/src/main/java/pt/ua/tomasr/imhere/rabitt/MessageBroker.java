@@ -147,9 +147,11 @@ public class MessageBroker {
 
             // Pulling items from the Objects
             String msg = oneObject.getString("message");
+            String author = oneObject.getString("author");
+            String msg_final = author+": "+msg;
 
             //Add to the list
-            chatmessages.add(msg);
+            chatmessages.add(msg_final);
         }
         Log.i("msg",""+chatmessages);
 
