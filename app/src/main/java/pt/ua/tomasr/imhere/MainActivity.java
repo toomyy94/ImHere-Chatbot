@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity
     String device_token = "";
 
     //Messages
+    public static MessageBroker msg = new MessageBroker();
     String hash = "";
 
 
@@ -223,6 +224,9 @@ public class MainActivity extends AppCompatActivity
         }
         else if(id == R.id.action_slack) {
 
+            new RabbitSlackLogin().execute();
+            SystemClock.sleep(1000);
+
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://slack.com/oauth/authorize?scope=identity.basic&client_id=89179064241.89178516167"));
             startActivity(browserIntent);
         }
@@ -248,7 +252,12 @@ public class MainActivity extends AppCompatActivity
 
             new GETInsideCircle().execute(URL_insidecircle);
 
-            if (InsideCircle.size()==0) SystemClock.sleep(1500);
+            if (InsideCircle.size()==0) {
+
+                Log.i("inside circle",""+InsideCircle.toString());
+                SystemClock.sleep(2500);
+            }
+            Log.i("inside circle",""+InsideCircle.toString());
 
             Bundle bundle = new Bundle();
             bundle.putString("hash", hash );
@@ -269,7 +278,7 @@ public class MainActivity extends AppCompatActivity
             bundle.putString("hash", hash );
             bundle.putString("user_id", tmp_extraFromEmail );
 
-            MapFragment fragment = new MapFragment(gps);
+            MapFragment fragment = new MapFragment(gps, InsideCircle);
             //args
             fragment.setArguments(bundle);
             //-----
@@ -375,17 +384,13 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected String doInBackground(String... urls) {
 
-            MessageBroker msg = new MessageBroker();
             msg.connect();
 
             try {
-                //msg.createQueue("hello");
-                //msg.consume("hello");
-                //msg.publish("hello", "Please work");
-                String login = "{\"op_id\":0,\"user_id\":\""+g_extraFromEmail+"\",\"user_name\":\""+g_extraFromName+"\",\"hash\":\""+hash+"\",\"device_token\":\""+device_token+"\"}";
+                String mensagem = "{\"op_id\":0,\"user_id\":\""+g_extraFromEmail+"\",\"user_name\":\""+g_extraFromName+"\",\"hash\":\""+hash+"\",\"device_token\":\""+device_token+"\"}";
 
-                msg.publish("hello",login);
-                SystemClock.sleep(1500);
+                msg.publish("hello",mensagem);
+                SystemClock.sleep(2000);
                 msg.consume(hash);
 
             }catch (Exception e){
@@ -401,4 +406,37 @@ public class MainActivity extends AppCompatActivity
         }
 
     }
+
+    private class RabbitSlackLogin extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            try {
+                String mensagem = "{\"op_id\":3,\"hash\":\""+hash+"\"}";
+
+                msg.publish("hello",mensagem);
+                SystemClock.sleep(1000);
+
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.e("error","ERRO RABBIT");
+            }
+
+            return "";
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+        }
+
+    }
+
+
 }

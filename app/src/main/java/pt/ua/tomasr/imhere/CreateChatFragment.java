@@ -42,7 +42,6 @@ import java.util.HashMap;
 
 import pt.ua.tomasr.imhere.modules.ApplicationController;
 import pt.ua.tomasr.imhere.modules.LocationCoord;
-import pt.ua.tomasr.imhere.rabitt.MessageBroker;
 
 /**
  * @author Tomás Rodrigues (tomasrodrigues@ua.pt)
@@ -178,15 +177,12 @@ public class CreateChatFragment extends Fragment {
         @Override
         protected String doInBackground(String... urls) {
 
-            MessageBroker msg = new MessageBroker();
-            msg.connect();
-
             try {
                 String mensagem = "{\"op_id\":1,\"hash\":\""+hash+"\",\"chat_id\":\""+geo_id+"\"," +
                         "\"chat_name\":\""+str_chat_name+"\",\"chat_description\":\""+str_chat_description+"\"," +
                         "\"chat_time\":\""+str_chat_time+"\",\"chat_event\":\""+str_evento+"\"}";
 
-                msg.publish("hello",mensagem);
+                MainActivity.msg.publish("hello",mensagem);
 
             }catch (Exception e){
                 e.printStackTrace();

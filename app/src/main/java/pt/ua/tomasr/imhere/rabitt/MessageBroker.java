@@ -69,10 +69,12 @@ public class MessageBroker {
                     if(obj.getInt("op_id")==0)/*LOGIN*/ imprime_error(obj);
                     else if(obj.getInt("op_id")==1)/*CREATE CHAT*/{imprime_error(obj);}
                     else if(obj.getInt("op_id")==2)/*SEND MESSAGE*/ imprime_error(obj);
+                    else if(obj.getInt("op_id")==3)/*LOGIN W/ SLACK*/ imprime_error(obj);
                     else if(obj.getInt("op_id")==4)/*JOIN CHAT*/ {
                         chatmessages = parseMessages(obj);
                         imprime_error(obj);
                     }
+                    else if(obj.getInt("op_id")==6)/*DELETE CHAT*/ imprime_error(obj);
                     else if(obj.getInt("op_id")==8)/*GET CHAT INFO*/ {
                         chatinfos = parseAvailableChats(obj);
                         imprime_data(obj);
@@ -131,6 +133,7 @@ public class MessageBroker {
             //Add to the list
             InfoChat infoChat = new InfoChat(id,name,description,time,event);
             chatinfos.add(infoChat);
+            Log.i("cenas",chatinfos.get(i).toString());
         }
 
         return chatinfos;
@@ -153,7 +156,7 @@ public class MessageBroker {
             //Add to the list
             chatmessages.add(msg_final);
         }
-        Log.i("msg",""+chatmessages);
+        Log.i("msg no rabbit",""+chatmessages);
 
         return chatmessages;
 

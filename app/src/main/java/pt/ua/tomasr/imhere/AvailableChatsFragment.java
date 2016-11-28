@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,9 +43,15 @@ public class AvailableChatsFragment extends Fragment {
     ArrayList<Integer> ids_info = new ArrayList();
 
     //Rabbit parameters
+    MessageBroker msg = MainActivity.msg;
     String hash = "";
     String user_id = "";
-    public MessageBroker msg = new MessageBroker();
+    public static ArrayList<String> chatmessages = new ArrayList<String>();
+
+    //Loading
+    ProgressBar progress_bar;
+    TextView progress_text;
+
 
     public AvailableChatsFragment() {}
     public AvailableChatsFragment(List<GeoChat> insideCircle) {
@@ -82,9 +89,17 @@ public class AvailableChatsFragment extends Fragment {
             }
 
             ids_info.clear();
-            if(msg.getChatInfos().size()==0)SystemClock.sleep(1500);
+            if(msg.getChatInfos().size()==0){
+                progress_bar = (ProgressBar) view.findViewById(R.id.progress_bar);
+                progress_text = (TextView) view.findViewById(R.id.progress_text);
+                progress_text.setText("Looking for Chats...");
+                progress_bar.setVisibility(View.VISIBLE);
+                progress_text.setVisibility(View.VISIBLE);
+                SystemClock.sleep(2000);
+                progress_bar.setVisibility(View.GONE);
+                progress_text.setVisibility(View.GONE);
+            }
             for (InfoChat tmp:msg.getChatInfos()) {
-
                 ids_info.add(tmp.getID());
             }
 
@@ -96,6 +111,7 @@ public class AvailableChatsFragment extends Fragment {
                     GeoChat geoChat = insideCircle.get(position);
 
                     new RabbitJoinChat().execute(geoChat.getID().toString());
+                    SystemClock.sleep(1000);
 
                     try{
                         InfoChat infoChat = msg.getChatInfos().get(position);
@@ -107,13 +123,19 @@ public class AvailableChatsFragment extends Fragment {
                     Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
 
                     String extraFromName = getActivity().getIntent().getExtras().getString("EXTRA_SESSION_Name");
+                    String extraFromEmail = getActivity().getIntent().getExtras().getString("EXTRA_SESSION_Email");
                     Intent intent = new Intent(getActivity().getBaseContext(), ChatActivity.class);
 
                     try{
                         intent.putExtra("EXTRA_SESSION_Name", extraFromName);
+                        intent.putExtra("EXTRA_SESSION_Email", extraFromEmail);
+                        intent.putExtra("EXTRA_SESSION_Hash", hash);
                         intent.putExtra("chat_title",  msg.getChatInfos().get(position).getName());
                         intent.putExtra("chat_subtitle", msg.getChatInfos().get(position).getDescription());
                         intent.putExtra("chat_id", geoChat.getID().toString());
+                        chatmessages = msg.getChatMessages();
+                        intent.putStringArrayListExtra("chat_messages", chatmessages);
+
                         startActivityForResult(intent, 1);
                     }catch (JSONException e){
                         e.printStackTrace();
@@ -249,12 +271,12 @@ public class AvailableChatsFragment extends Fragment {
         @Override
         protected String doInBackground(String... urls) {
 
-            MessageBroker msg = new MessageBroker();
-            msg.connect();
-
             try {
                 String mensagem = "{\"op_id\":4,\"hash\":\""+hash+"\",\"chat_id\":\""+urls[0]+"\"}";
+                chatmessages.clear();
                 msg.publish("hello",mensagem);
+
+                SystemClock.sleep(1000);
 
             }catch (Exception e){
                 e.printStackTrace();
@@ -289,7 +311,6 @@ public class AvailableChatsFragment extends Fragment {
 
                 msg.getChatInfos().clear();
                 msg.publish("hello",mensagem);
-                SystemClock.sleep(1500);
 
 
             }catch (Exception e){
