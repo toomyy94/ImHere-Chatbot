@@ -80,4 +80,21 @@
         android:layout_toEndOf="@+id/progress_bar"
         android:visibility="gone"/>
 
+    <!--DELETE BUTTON->
+    <Button
+        <!-android:id="@+id/delete_btn"-->
+
+        <!--android:text="Delete"-->
+        <!--android:textColor="#FF0000"-->
+        <!--android:textSize="20sp"-->
+        <!--android:layout_width="100dp"-->
+        <!--android:shadowColor="#A8A8A8"-->
+        <!--android:shadowDx="0"-->
+        <!--android:shadowDy="0"-->
+        <!--android:shadowRadius="0"-->
+        <!--android:layout_alignParentEnd="true"-->
+        <!--android:layout_height="20dp"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:layout_above="@+id/chat_subtitle" />-->
+
 </RelativeLayout>

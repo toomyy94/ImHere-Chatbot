@@ -2,6 +2,7 @@ package pt.ua.tomasr.imhere.chat;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -17,7 +18,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import pt.ua.tomasr.imhere.MainActivity;
 import pt.ua.tomasr.imhere.R;
 import pt.ua.tomasr.imhere.rabitt.MessageBroker;
 
@@ -25,12 +29,15 @@ public class ChatActivity extends AppCompatActivity {
 
     private ListView mListView;
     private Button mButtonSend;
+    private Button DeleteButton;
     private EditText mEditTextMessage;
     private ImageView mImageView;
     private String mensagem_do_bot="Bot: ";
 
     //messages
-    public static ArrayList<String> chatmessages = new ArrayList<String>();
+    public ArrayList<String> chatmessages = new ArrayList<String>();
+    public String one_message = "";
+    public String test = "";
     String user_name = "";
 
     //Loading
@@ -38,7 +45,7 @@ public class ChatActivity extends AppCompatActivity {
     TextView progress_text;
 
     //Rabbit parameters
-    public MessageBroker msg = new MessageBroker();
+    MessageBroker msg = MainActivity.msg;
     String hash = "";
     String user_id = "";
     String extraTitle = "";
@@ -75,11 +82,42 @@ public class ChatActivity extends AppCompatActivity {
 
         mListView = (ListView) findViewById(R.id.listView);
         mButtonSend = (Button) findViewById(R.id.btn_send);
+        //DeleteButton = (Button) findViewById(R.id.delete_btn);
         mEditTextMessage = (EditText) findViewById(R.id.et_message);
         mImageView = (ImageView) findViewById(R.id.iv_image);
 
         mAdapter = new ChatMessageAdapter(this, new ArrayList<ChatMessage>());
         mListView.setAdapter(mAdapter);
+
+
+//        DeleteButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                final String URL = "http://192.168.8.217:5011/location/point/"+chat_id;
+//                // pass second argument as "null" for GET requests
+//                JsonObjectRequest req = new JsonObjectRequest(URL, null,
+//                        new Response.Listener<JSONObject>() {
+//                            @Override
+//                            public void onResponse(JSONObject response) {
+//                                try {
+//                                    VolleyLog.v("Response:%n %s", response.toString(4));
+//                                } catch (JSONException e) {
+//                                    e.printStackTrace();
+//                                }
+//                            }
+//                        }, new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        VolleyLog.e("Error: ", error.getMessage());
+//                    }
+//                });
+//
+//// add the request object to the queue to be executed
+//                ApplicationController.getInstance().addToRequestQueue(req);
+//
+//
+//            }
+//        });
 
 
         mButtonSend.setOnClickListener(new View.OnClickListener() {
@@ -93,7 +131,7 @@ public class ChatActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(message)) {
                     return;
                 }
-                sendMessage(extraFromName + ": " + message);
+                sendMessage(user_name + ": " + message);
                 mEditTextMessage.setText("");
 
                 //Rabbit message
@@ -133,7 +171,7 @@ public class ChatActivity extends AppCompatActivity {
             progress_text.setText("Loading old messages...");
             progress_bar.setVisibility(View.VISIBLE);
             progress_text.setVisibility(View.VISIBLE);
-            SystemClock.sleep(2000);
+            SystemClock.sleep(1000);
             progress_bar.setVisibility(View.GONE);
             progress_text.setVisibility(View.GONE);
         }
@@ -144,9 +182,47 @@ public class ChatActivity extends AppCompatActivity {
                 sendMessage(chatmessages.get(i));
             } else mimicOtherMessage(chatmessages.get(i));
         }
+
+        //Ver novas mensagens
+        callAsynchronousTask();
+
     }
 
-    private void sendMessage(String message) {
+    public void callAsynchronousTask(){
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask doAsynchronousTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try {
+
+                            PerformBackgroundTask performBackgroundTask = new PerformBackgroundTask();
+                            // PerformBackgroundTask this class is the class that extends AsynchTask
+                            performBackgroundTask.execute();
+
+                            String[] tmp_msg = one_message.split("#");
+                            String id_chat = tmp_msg[0];
+                            if(!one_message.equals("") && id_chat.equals(chat_id)){
+                                String[] tmp_msg2 = one_message.split(":");
+                                if(!test.equals(one_message)){
+                                    mimicOtherMessage(tmp_msg2[1]);
+                                }
+
+                            }
+
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                        }
+                    }
+                });
+            }
+        };
+        timer.schedule(doAsynchronousTask, 0, 6000); //execute in every 50000 ms
+    }
+
+    public void sendMessage(String message) {
         ChatMessage chatMessage = new ChatMessage(message, true, false);
         mAdapter.add(chatMessage);
 
@@ -193,60 +269,6 @@ public class ChatActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-//    private class GETChatBotMessage extends AsyncTask<String, Void, String> {
-//        private ProgressDialog pDialog;
-//
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//
-//        }
-//
-//        @Override
-//        protected String doInBackground(String... urls) {
-//
-//            try {
-//                StringBuilder result = new StringBuilder();
-//                URL url = new URL(urls[0]);
-//                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//                conn.setRequestMethod("GET");
-//                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-//                String line;
-//                while ((line = rd.readLine()) != null) {
-//                    result.append(line);
-//                }
-//                rd.close();
-//
-//                String resultado = result.toString();
-//                JSONArray jArray = new JSONArray(resultado);
-//
-//                ArrayList<String> list = new ArrayList<String>();
-//
-//                if (jArray != null) {
-//                    int len = jArray.length();
-//                    for (int i=0;i<len;i++){
-//                        list.add(jArray.get(i).toString());
-//                    }
-//                }
-//                //for(int i=0; i<list.size();i++) {
-//                    mensagem_do_bot = "Bot: ";
-//                    mensagem_do_bot += list.get(0).toString();
-//                //}
-//
-//                return mensagem_do_bot;
-//            } catch (Exception e) {
-//                Log.e("erro","Erro no GET da Mensagem do bot!!!");
-//                e.printStackTrace();
-//            }
-//            return mensagem_do_bot;
-//        }
-//
-//        protected void onPostExecute(Boolean result) {
-//
-//        }
-//
-//    }
-
     private class RabbitSendMessage extends AsyncTask<String, Void, String> {
 
         @Override
@@ -258,13 +280,8 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... urls) {
 
-            MessageBroker msg = new MessageBroker();
-            msg.connect();
-
             try {
-
                 String mensagem = "{\"op_id\":2,\"hash\":\""+hash+"\",\"chat_id\":\""+chat_id+"\",\"msg\":\""+urls[0]+"\"}";
-
                 msg.publish("hello",mensagem);
 
             }catch (Exception e){
@@ -273,6 +290,31 @@ public class ChatActivity extends AppCompatActivity {
             }
 
             return "";
+        }
+
+        protected void onPostExecute(Boolean result) {
+
+        }
+
+    }
+
+    private class PerformBackgroundTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            test = one_message;
+            one_message = msg.one_message;
+            Log.i("one_message",""+one_message);
+            Log.i("teste_message",""+test);
+
+            return one_message;
         }
 
         protected void onPostExecute(Boolean result) {

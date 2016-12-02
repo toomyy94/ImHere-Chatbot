@@ -27,8 +27,9 @@ public class MessageBroker {
     private Channel channel;
     private Connection connection;
 
-    public static ArrayList<InfoChat> chatinfos = new ArrayList<InfoChat>();
-    public static ArrayList<String> chatmessages = new ArrayList<String>();
+    public ArrayList<InfoChat> chatinfos = new ArrayList<InfoChat>();
+    public ArrayList<String> chatmessages = new ArrayList<String>();
+    public String one_message = new String();
 
     public void connect(){
         try {
@@ -78,6 +79,10 @@ public class MessageBroker {
                     else if(obj.getInt("op_id")==8)/*GET CHAT INFO*/ {
                         chatinfos = parseAvailableChats(obj);
                         imprime_data(obj);
+                    }
+                    else if(obj.getInt("op_id")==11)/*UPDATE MESSAGE*/{
+                        one_message = parse_oneMessage(obj);
+                        imprime_error(obj);
                     }
 
 
@@ -159,6 +164,29 @@ public class MessageBroker {
         Log.i("msg no rabbit",""+chatmessages);
 
         return chatmessages;
+
+    }
+
+    public String parse_oneMessage(JSONObject obj) throws JSONException{
+
+        JSONArray jArray = obj.getJSONArray("data");
+
+        for (int i=0; i < jArray.length(); i++) {
+
+            JSONObject oneObject = jArray.getJSONObject(i);
+
+            // Pulling items from the Objects
+            String msg = oneObject.getString("message");
+            String author = oneObject.getString("author");
+            Integer id = oneObject.getInt("id");
+            String msg_final = id+"#"+author+": "+msg;
+
+            //Add to the list
+            one_message = msg_final;
+        }
+        Log.i("one_message no rabbit",""+one_message);
+
+        return one_message;
 
     }
     

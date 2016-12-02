@@ -59,23 +59,6 @@
         android:hint="Radius(km)"
         android:inputType="number" />
 
-    <CheckBox
-        android:text="Private"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/checkBox_public"
-        android:textAlignment="center"
-        android:checked="false" />
-
-    <EditText
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/chat_password"
-        android:visibility="visible"
-        android:backgroundTint="@color/colorPrimaryDark"
-        android:hint="Password"
-        android:inputType="textWebPassword" />
-
 
     <TableLayout
         android:layout_width="match_parent"

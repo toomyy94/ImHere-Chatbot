@@ -1,10 +1,12 @@
 package pt.ua.tomasr.imhere;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -14,7 +16,9 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -49,7 +53,6 @@ import pt.ua.tomasr.imhere.rabitt.MessageBroker;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
-    private LocationCoord gps = null;
     private List<Circle> mCircle = new ArrayList<>();
     private List<Marker> mMarkers = new ArrayList<>();
 
@@ -59,6 +62,7 @@ public class MainActivity extends AppCompatActivity
     //Google Auth Info
     String g_extraFromName = "";
     String g_extraFromEmail = "";
+    Uri g_extraFromPhoto = null;
     String g_extraFromId = "";
     String device_token = "";
 
@@ -66,6 +70,11 @@ public class MainActivity extends AppCompatActivity
     public static MessageBroker msg = new MessageBroker();
     String hash = "";
 
+    //Navigation Menu
+    private NavigationView navigationView = null;
+    private Toolbar toolbar = null;
+    private LocationCoord gps = null;
+    private static final int PERMISSION_REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,9 +91,6 @@ public class MainActivity extends AppCompatActivity
         g_extraFromEmail = extraFromEmail;
         g_extraFromName = extraFromName;
 
-        //Login Message
-        new RabbitLoginMessage().execute();
-
         //------------ TA A FUNCIONAR
         device_token = FirebaseInstanceId.getInstance().getToken();
         Log.d("Device Token: ",device_token);
@@ -94,7 +100,8 @@ public class MainActivity extends AppCompatActivity
         wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         wifi.setWifiEnabled(true);//Turn on Wifi
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -117,6 +124,12 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
         Log.i("Login:",extraFromName+" está logado!");
 
         try {
@@ -133,8 +146,10 @@ public class MainActivity extends AppCompatActivity
         }catch (Exception e){
             Log.e("Erro:","Erro algoritmo de digest Inexistente!");
         }
-        //Passar cenas ao Gabriel....
-            //...
+
+        //Login Message
+        new RabbitLoginMessage().execute();
+
 
         //GPS Manage
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -177,12 +192,18 @@ public class MainActivity extends AppCompatActivity
 
         gps = new LocationCoord(this);
 
+        String URL_insidecircle = "http://192.168.8.217:5011/location/insideCircle?latitude="+gps.getLatitude()+
+                "&longitude="+gps.getLongitude();
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+        new GETInsideCircle().execute(URL_insidecircle);
+
+        if (InsideCircle.size()==0) {
+
+            Log.i("inside circle",""+InsideCircle.toString());
+            SystemClock.sleep(500);
+        }
+        Log.i("inside circle",""+InsideCircle.toString());
+
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -197,6 +218,25 @@ public class MainActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        //fragmetn initially
+        UserProfileFragment fragment = new UserProfileFragment(g_extraFromName, g_extraFromEmail, g_extraFromPhoto);
+        android.support.v4.app.FragmentTransaction fragmentTransaction =
+                getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, fragment);
+        fragmentTransaction.commit();
+
+        // permission android 6.0
+        if (!checkPermission()) {
+            requestPermission();
+        }
+
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -225,9 +265,9 @@ public class MainActivity extends AppCompatActivity
         else if(id == R.id.action_slack) {
 
             new RabbitSlackLogin().execute();
-            SystemClock.sleep(1000);
+            SystemClock.sleep(500);
 
-            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://slack.com/oauth/authorize?scope=identity.basic&client_id=89179064241.89178516167"));
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://slack.com/oauth/authorize?scope=channels:write,chat:write:user&client_id=89179064241.89178516167"));
             startActivity(browserIntent);
         }
 
@@ -247,17 +287,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            String URL_insidecircle = "http://192.168.8.217:5011/location/insideCircle?latitude="+gps.getLatitude()+
-                    "&longitude="+gps.getLongitude();
 
-            new GETInsideCircle().execute(URL_insidecircle);
-
-            if (InsideCircle.size()==0) {
-
-                Log.i("inside circle",""+InsideCircle.toString());
-                SystemClock.sleep(2500);
-            }
-            Log.i("inside circle",""+InsideCircle.toString());
 
             Bundle bundle = new Bundle();
             bundle.putString("hash", hash );
@@ -316,6 +346,17 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private boolean checkPermission(){
+        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (result == PackageManager.PERMISSION_GRANTED) return true;
+        else return false;
+    }
+
+    private void requestPermission(){
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
+    }
+
 
     private class GETInsideCircle extends AsyncTask<String, Void, ArrayList> {
         private ProgressDialog pDialog;
@@ -385,12 +426,11 @@ public class MainActivity extends AppCompatActivity
         protected String doInBackground(String... urls) {
 
             msg.connect();
-
             try {
                 String mensagem = "{\"op_id\":0,\"user_id\":\""+g_extraFromEmail+"\",\"user_name\":\""+g_extraFromName+"\",\"hash\":\""+hash+"\",\"device_token\":\""+device_token+"\"}";
 
                 msg.publish("hello",mensagem);
-                SystemClock.sleep(2000);
+                SystemClock.sleep(1000);
                 msg.consume(hash);
 
             }catch (Exception e){
@@ -422,7 +462,7 @@ public class MainActivity extends AppCompatActivity
                 String mensagem = "{\"op_id\":3,\"hash\":\""+hash+"\"}";
 
                 msg.publish("hello",mensagem);
-                SystemClock.sleep(1000);
+                SystemClock.sleep(500);
 
             }catch (Exception e){
                 e.printStackTrace();

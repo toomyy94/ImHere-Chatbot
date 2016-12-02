@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -100,8 +99,8 @@ public class CreateChatFragment extends Fragment {
                 EditText chat_description = (EditText) frag.findViewById(R.id.chat_description);
                 EditText chat_radius = (EditText) frag.findViewById(R.id.chat_radius);
                 EditText chat_time = (EditText) frag.findViewById(R.id.chat_time);
-                CheckBox checkBox_public = (CheckBox) frag.findViewById(R.id.checkBox_public);
-                EditText chat_password = (EditText) frag.findViewById(R.id.chat_password);
+//                CheckBox checkBox_public = (CheckBox) frag.findViewById(R.id.checkBox_public);
+//                EditText chat_password = (EditText) frag.findViewById(R.id.chat_password);
                 Spinner evento = (Spinner) frag.findViewById(R.id.evento);
                 //Get Tetx's
                 str_chat_name = chat_name.getText().toString();
@@ -147,7 +146,7 @@ public class CreateChatFragment extends Fragment {
 
                 //Voltar ao mapa
                 //Fragment MapFragment = new MapFragment(gps, str_chat_name, str_chat_description, str_chat_radius, str_chat_time, str_checkBox_public, str_chat_password, str_evento);
-                SystemClock.sleep(1000);
+                SystemClock.sleep(500);
                 Bundle bundle = new Bundle();
                 bundle.putString("hash", hash );
 

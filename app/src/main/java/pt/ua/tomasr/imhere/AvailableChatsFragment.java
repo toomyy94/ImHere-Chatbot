@@ -72,10 +72,9 @@ public class AvailableChatsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_availablechats,
                 container, false);
 
-        new RabbitGetChatInfo().execute();
-
         Bundle bundle = this.getArguments();
         hash = bundle.getString("hash");
+
 
         //Customized List
         ArrayAdapter<GeoChat> adapter = new MyListAdapter();
@@ -88,6 +87,9 @@ public class AvailableChatsFragment extends Fragment {
                 ids.add(tmp.getID());
             }
 
+            new RabbitGetChatInfo().execute();
+
+
             ids_info.clear();
             if(msg.getChatInfos().size()==0){
                 progress_bar = (ProgressBar) view.findViewById(R.id.progress_bar);
@@ -95,7 +97,7 @@ public class AvailableChatsFragment extends Fragment {
                 progress_text.setText("Looking for Chats...");
                 progress_bar.setVisibility(View.VISIBLE);
                 progress_text.setVisibility(View.VISIBLE);
-                SystemClock.sleep(2000);
+                SystemClock.sleep(500);
                 progress_bar.setVisibility(View.GONE);
                 progress_text.setVisibility(View.GONE);
             }
@@ -111,7 +113,7 @@ public class AvailableChatsFragment extends Fragment {
                     GeoChat geoChat = insideCircle.get(position);
 
                     new RabbitJoinChat().execute(geoChat.getID().toString());
-                    SystemClock.sleep(1000);
+                    SystemClock.sleep(500);
 
                     try{
                         InfoChat infoChat = msg.getChatInfos().get(position);
@@ -276,7 +278,7 @@ public class AvailableChatsFragment extends Fragment {
                 chatmessages.clear();
                 msg.publish("hello",mensagem);
 
-                SystemClock.sleep(1000);
+                SystemClock.sleep(500);
 
             }catch (Exception e){
                 e.printStackTrace();
@@ -304,13 +306,13 @@ public class AvailableChatsFragment extends Fragment {
         protected String doInBackground(String... urls) {
 
             try {
-                msg.connect();
 
                 String mensagem = "{\"op_id\":8,\"hash\":\""+hash+"\",\"chat_id\":"+ids+"}";
                 JSONObject obj = new JSONObject(mensagem);
 
                 msg.getChatInfos().clear();
                 msg.publish("hello",mensagem);
+                SystemClock.sleep(500);
 
 
             }catch (Exception e){

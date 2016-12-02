@@ -114,9 +114,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 "&longitude="+gps.getLongitude();
 
         new GETClosestsPoints().execute(URL_closestpoints);
+
+        for (GeoChat tmp:insideCircle) {
+            ids.add(tmp.getID());
+        }
+
+        new RabbitGetChatInfo().execute();
         new GETInsideCircle().execute(URL_insidecircle);
-
-
 
     }
 
@@ -142,8 +146,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
 
         Log.i("ids",""+ids_info);
-
-        new RabbitGetChatInfo().execute();
 
         return v;
     }
@@ -189,11 +191,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                     LatLng circulos = new LatLng(a_insidecircles[i + 1], a_insidecircles[i + 2]);
                     //entra no chat
                     if (marker.getPosition().equals(circulos)) {
-                        Log.i("posicao", "circulo perto, entrei");
 
                         new RabbitJoinChat().execute(a_insidecircles[i].toString());
-
-                        SystemClock.sleep(1500);
+                        SystemClock.sleep(500);
 
                         String message = "Entering Chat... ";
                         Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
@@ -206,14 +206,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         intent.putExtra("EXTRA_SESSION_Name", extraFromName);
                         intent.putExtra("EXTRA_SESSION_Email", extraFromEmail);
                         intent.putExtra("EXTRA_SESSION_Hash", hash);
-                        try {
-                            intent.putExtra("chat_title", msg.getChatInfos().get(0).getName());
-                            intent.putExtra("chat_subtitle", msg.getChatInfos().get(0).getDescription());
-                            intent.putExtra("chat_id", a_insidecircles[i].toString());
-                            chatmessages = msg.getChatMessages();
-                            intent.putStringArrayListExtra("chat_messages", chatmessages);
 
-                            startActivityForResult(intent, 1);
+
+                        try {
+                            for(int j=0; j<msg.getChatInfos().size();j++) {
+                                if(a_insidecircles[j].intValue() == msg.getChatInfos().get(j).getID()) {
+                                    intent.putExtra("chat_title", msg.getChatInfos().get(0).getName());
+                                    intent.putExtra("chat_subtitle", msg.getChatInfos().get(0).getDescription());
+                                    intent.putExtra("chat_id", a_insidecircles[i].toString());
+                                    chatmessages = msg.getChatMessages();
+                                    intent.putStringArrayListExtra("chat_messages", chatmessages);
+
+                                    startActivityForResult(intent, 1);
+                                }
+                            }
 
                         }catch (JSONException e){
                             e.printStackTrace();
@@ -420,11 +426,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
             try {
 
-                String mensagem = "{\"op_id\":8,\"hash\":\""+hash+"\",\"chat_id\":"+ids_info+"}";
+                String mensagem = "{\"op_id\":8,\"hash\":\""+hash+"\",\"chat_id\":"+ids+"}";
                 JSONObject obj = new JSONObject(mensagem);
 
                 msg.getChatInfos().clear();
                 msg.publish("hello",mensagem);
+                SystemClock.sleep(500);
 
 
             }catch (Exception e){
