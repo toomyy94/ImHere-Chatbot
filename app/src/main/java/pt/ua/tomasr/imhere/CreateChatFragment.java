@@ -112,7 +112,9 @@ public class CreateChatFragment extends Fragment {
                 str_evento = evento.getSelectedItem().toString();
 
                 String url = "http://192.168.8.217:5011/location/point";
-                if(str_chat_radius != 5.0) str_chat_radius = Double.parseDouble(chat_radius.getText().toString());
+                if(str_chat_radius != 5.0) str_chat_radius = Double.parseDouble(chat_radius.getText().toString())*1000;
+                //Tamanho máximo 800 Km
+                if(str_chat_radius > 800000) str_chat_radius = 800000.0;
 
                 final String URL = "http://192.168.8.217:5011/location/point";
                 // Post params to be sent to the server

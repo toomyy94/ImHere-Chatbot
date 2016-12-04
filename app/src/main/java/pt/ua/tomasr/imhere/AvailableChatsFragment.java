@@ -218,32 +218,32 @@ public class AvailableChatsFragment extends Fragment {
 
                 // Fill the view
                 imageView = (ImageView)itemView.findViewById(R.id.item_icon);
-                imageView.setTag(R.id.item_icon);
+                imageView.setTag(R.drawable.logo);
                 //set...
                 switch (infoChat.getEvent()){
                     case "Music Festival":
                         imageView.setImageResource(R.drawable.music_festival);
-                        imageView.setTag(R.drawable.music_festival);
+                        //imageView.setTag(R.drawable.music_festival);
                         break;
                    case "Local show":
                             imageView.setImageResource(R.drawable.local_show);
-                            imageView.setTag(R.drawable.local_show);
+                          //  imageView.setTag(R.drawable.local_show);
                             break;
                    case "Street market":
                             imageView.setImageResource(R.drawable.market);
-                            imageView.setTag(R.drawable.market);
+                            //imageView.setTag(R.drawable.market);
                             break;
                    case "Building Reunion":
                             imageView.setImageResource(R.drawable.building);
-                            imageView.setTag(R.drawable.building);
+                            //imageView.setTag(R.drawable.building);
                             break;
                    case "School/University":
                             imageView.setImageResource(R.drawable.uni);
-                            imageView.setTag(R.drawable.uni);
+                            //imageView.setTag(R.drawable.uni);
                             break;
                    case "Sport related":
                             imageView.setImageResource(R.drawable.sport);
-                            imageView.setTag(R.drawable.sport);
+                            //imageView.setTag(R.drawable.sport);
                             break;
                    case "Other":
                             //...

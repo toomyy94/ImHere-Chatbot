@@ -17,8 +17,8 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
 
+import pt.ua.tomasr.imhere.MainActivity;
 import pt.ua.tomasr.imhere.R;
-import pt.ua.tomasr.imhere.chat.ChatActivity;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -87,7 +87,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      */
     private void sendNotification(NotificationData notificationData) {
 
-        Intent i = new Intent(this, ChatActivity.class);
+        Intent i = new Intent(this, MainActivity.class);
         i.putExtra(NotificationData.TEXT, notificationData.getTextMessage());
 
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

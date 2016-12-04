@@ -5,11 +5,11 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string-array name="array_eventos">
-        <item>Music festival</item>
-        <item>Local show</item>
-        <item>Street market</item>
-        <item>Building Reunion</item>
         <item>School/University</item>
+        <item>Street market</item>
+        <item>Local show</item>
+        <item>Music festival</item>
+        <item>Building Reunion</item>
         <item>Sport related</item>
         <item>Other</item>
     </string-array>
