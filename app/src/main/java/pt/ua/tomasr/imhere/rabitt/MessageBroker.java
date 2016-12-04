@@ -138,7 +138,6 @@ public class MessageBroker {
             //Add to the list
             InfoChat infoChat = new InfoChat(id,name,description,time,event);
             chatinfos.add(infoChat);
-            Log.i("cenas",chatinfos.get(i).toString());
         }
 
         return chatinfos;

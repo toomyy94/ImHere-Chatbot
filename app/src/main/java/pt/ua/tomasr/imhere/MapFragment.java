@@ -163,7 +163,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             progress_text.setText("Updating Map...");
             progress_bar.setVisibility(View.VISIBLE);
             progress_text.setVisibility(View.VISIBLE);
-            SystemClock.sleep(2000);
+            SystemClock.sleep(1500);
             progress_bar.setVisibility(View.GONE);
             progress_text.setVisibility(View.GONE);
         }
@@ -211,8 +211,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         try {
                             for(int j=0; j<msg.getChatInfos().size();j++) {
                                 if(a_insidecircles[j].intValue() == msg.getChatInfos().get(j).getID()) {
-                                    intent.putExtra("chat_title", msg.getChatInfos().get(0).getName());
-                                    intent.putExtra("chat_subtitle", msg.getChatInfos().get(0).getDescription());
+                                    intent.putExtra("chat_title", msg.getChatInfos().get(j).getName());
+                                    intent.putExtra("chat_subtitle", msg.getChatInfos().get(j).getDescription());
                                     intent.putExtra("chat_id", a_insidecircles[i].toString());
                                     chatmessages = msg.getChatMessages();
                                     intent.putStringArrayListExtra("chat_messages", chatmessages);
@@ -244,7 +244,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     public void addClosestCircle(Double chat_lat, Double chat_lon, Double chat_radius) {
         mCircle.add(mMap.addCircle(new CircleOptions().center(
-                new LatLng(chat_lat, chat_lon)).radius(chat_radius).fillColor(Color.argb(120, 0, 0, 200)).strokeColor(Color.argb(90, 0, 0, 200)).strokeWidth(8)));
+                new LatLng(chat_lat, chat_lon)).radius(chat_radius).fillColor(Color.argb(60, 0, 0, 200)).strokeColor(Color.argb(90, 0, 0, 200)).strokeWidth(8)));
     }
 
     public void addMarker(String chat_name, String chat_description, String event_type) {

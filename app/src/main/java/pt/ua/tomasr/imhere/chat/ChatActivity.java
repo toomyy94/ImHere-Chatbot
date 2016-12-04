@@ -36,9 +36,13 @@ public class ChatActivity extends AppCompatActivity {
 
     //messages
     public ArrayList<String> chatmessages = new ArrayList<String>();
+    String user_name = "";
+
+    //one_message
     public String one_message = "";
     public String test = "";
-    String user_name = "";
+    int primeira_vez = 0;
+
 
     //Loading
     ProgressBar progress_bar;
@@ -50,6 +54,7 @@ public class ChatActivity extends AppCompatActivity {
     String user_id = "";
     String extraTitle = "";
     String chat_id = "";
+    Double d_chat_id = -1.0;
 
 
     private ChatMessageAdapter mAdapter;
@@ -70,11 +75,19 @@ public class ChatActivity extends AppCompatActivity {
         TextView subTitle = (TextView) findViewById(R.id.chat_subtitle);
         subTitle.setText(extrasubTitle);//subtittle
 
+        if(getIntent().getStringExtra("EXTRA_SESSION_Image")!=null) {
+            Integer background = Integer.parseInt(getIntent().getStringExtra("EXTRA_SESSION_Image"));
+            ImageView rel = (ImageView) findViewById(R.id.background);
+            rel.setBackgroundResource(background);
+        }
+
         hash = getIntent().getStringExtra("EXTRA_SESSION_Hash");
         user_id = getIntent().getStringExtra("EXTRA_SESSION_Email");
+
         String[] tmp = user_id.split("@");
         user_name = tmp[0];
         chat_id = getIntent().getStringExtra("chat_id");
+        d_chat_id = Double.parseDouble(chat_id);
 
         //Fazer algo com isto
         String extraId = getIntent().getStringExtra("chat_id");
@@ -203,11 +216,10 @@ public class ChatActivity extends AppCompatActivity {
                             performBackgroundTask.execute();
 
                             String[] tmp_msg = one_message.split("#");
-                            String id_chat = tmp_msg[0];
-                            if(!one_message.equals("") && id_chat.equals(chat_id)){
-                                String[] tmp_msg2 = one_message.split(":");
+                            Integer id_chat = Integer.parseInt(tmp_msg[0]);
+                            if(!one_message.equals("") && (id_chat==(d_chat_id.intValue()))){
                                 if(!test.equals(one_message)){
-                                    mimicOtherMessage(tmp_msg2[1]);
+                                    mimicOtherMessage(tmp_msg[1]);
                                 }
 
                             }
@@ -308,12 +320,12 @@ public class ChatActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... urls) {
-
-            test = one_message;
+            if(primeira_vez!=0) test = one_message;
             one_message = msg.one_message;
             Log.i("one_message",""+one_message);
             Log.i("teste_message",""+test);
 
+            primeira_vez +=1;
             return one_message;
         }
 

@@ -52,6 +52,9 @@ public class AvailableChatsFragment extends Fragment {
     ProgressBar progress_bar;
     TextView progress_text;
 
+    //A passar para o Chat
+    ImageView imageView;
+
 
     public AvailableChatsFragment() {}
     public AvailableChatsFragment(List<GeoChat> insideCircle) {
@@ -132,6 +135,7 @@ public class AvailableChatsFragment extends Fragment {
                         intent.putExtra("EXTRA_SESSION_Name", extraFromName);
                         intent.putExtra("EXTRA_SESSION_Email", extraFromEmail);
                         intent.putExtra("EXTRA_SESSION_Hash", hash);
+                        intent.putExtra("EXTRA_SESSION_Image", imageView.getTag().toString());
                         intent.putExtra("chat_title",  msg.getChatInfos().get(position).getName());
                         intent.putExtra("chat_subtitle", msg.getChatInfos().get(position).getDescription());
                         intent.putExtra("chat_id", geoChat.getID().toString());
@@ -175,7 +179,8 @@ public class AvailableChatsFragment extends Fragment {
             GeoChat geoChat = insideCircle.get(position);
 
             // Fill the view
-            ImageView imageView = (ImageView)itemView.findViewById(R.id.item_icon);
+            imageView = (ImageView)itemView.findViewById(R.id.item_icon);
+            imageView.setTag(R.id.item_icon);
             //set...
 
             // Direita:
@@ -212,26 +217,33 @@ public class AvailableChatsFragment extends Fragment {
                 InfoChat infoChat = msg.getChatInfos().get(position);
 
                 // Fill the view
-                ImageView imageView = (ImageView)itemView.findViewById(R.id.item_icon);
+                imageView = (ImageView)itemView.findViewById(R.id.item_icon);
+                imageView.setTag(R.id.item_icon);
                 //set...
                 switch (infoChat.getEvent()){
                     case "Music Festival":
                         imageView.setImageResource(R.drawable.music_festival);
+                        imageView.setTag(R.drawable.music_festival);
                         break;
                    case "Local show":
                             imageView.setImageResource(R.drawable.local_show);
+                            imageView.setTag(R.drawable.local_show);
                             break;
                    case "Street market":
                             imageView.setImageResource(R.drawable.market);
+                            imageView.setTag(R.drawable.market);
                             break;
                    case "Building Reunion":
                             imageView.setImageResource(R.drawable.building);
+                            imageView.setTag(R.drawable.building);
                             break;
                    case "School/University":
                             imageView.setImageResource(R.drawable.uni);
+                            imageView.setTag(R.drawable.uni);
                             break;
                    case "Sport related":
                             imageView.setImageResource(R.drawable.sport);
+                            imageView.setTag(R.drawable.sport);
                             break;
                    case "Other":
                             //...

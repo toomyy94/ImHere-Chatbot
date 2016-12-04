@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity
         if (InsideCircle.size()==0) {
 
             Log.i("inside circle",""+InsideCircle.toString());
-            SystemClock.sleep(500);
+            SystemClock.sleep(1000);
         }
         Log.i("inside circle",""+InsideCircle.toString());
 
