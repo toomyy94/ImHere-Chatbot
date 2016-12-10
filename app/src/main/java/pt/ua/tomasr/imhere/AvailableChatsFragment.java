@@ -139,8 +139,8 @@ public class AvailableChatsFragment extends Fragment {
                         intent.putExtra("chat_title",  msg.getChatInfos().get(position).getName());
                         intent.putExtra("chat_subtitle", msg.getChatInfos().get(position).getDescription());
                         intent.putExtra("chat_id", geoChat.getID().toString());
-                        chatmessages = msg.getChatMessages();
                         intent.putStringArrayListExtra("chat_messages", chatmessages);
+                        chatmessages = msg.getChatMessages();
 
                         startActivityForResult(intent, 1);
                     }catch (JSONException e){
@@ -223,27 +223,27 @@ public class AvailableChatsFragment extends Fragment {
                 switch (infoChat.getEvent()){
                     case "Music Festival":
                         imageView.setImageResource(R.drawable.music_festival);
-                        //imageView.setTag(R.drawable.music_festival);
+                        imageView.setTag(R.drawable.music_festival);
                         break;
                    case "Local show":
                             imageView.setImageResource(R.drawable.local_show);
-                          //  imageView.setTag(R.drawable.local_show);
+                            imageView.setTag(R.drawable.local_show);
                             break;
                    case "Street market":
                             imageView.setImageResource(R.drawable.market);
-                            //imageView.setTag(R.drawable.market);
+                            imageView.setTag(R.drawable.market);
                             break;
                    case "Building Reunion":
                             imageView.setImageResource(R.drawable.building);
-                            //imageView.setTag(R.drawable.building);
+                            imageView.setTag(R.drawable.building);
                             break;
                    case "School/University":
                             imageView.setImageResource(R.drawable.uni);
-                            //imageView.setTag(R.drawable.uni);
+                            imageView.setTag(R.drawable.uni);
                             break;
                    case "Sport related":
                             imageView.setImageResource(R.drawable.sport);
-                            //imageView.setTag(R.drawable.sport);
+                            imageView.setTag(R.drawable.sport);
                             break;
                    case "Other":
                             //...
