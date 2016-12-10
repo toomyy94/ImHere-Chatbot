@@ -16,6 +16,7 @@ ChatBot created to Service Engineering class
 * Firebase Push Notifications (imhere-chatbot.firebaseio.com)
 * Volley framework (to REST communications)
 * RabbitMQ
+
 Ps: You can gradle the app but you will not be able to run the entire project because it has micro-services associated that aren't running at the moment. For more info contact me for the e-mail bellow.
 
 
