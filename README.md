@@ -6,7 +6,7 @@ ChatBot created to Service Engineering class
 ![alt tag](https://github.com/toomyy94/ImHere-Chatbot/blob/master/Resources/printViews.png)
 
 ### Vídeo with all features
-* [On git](https://github.com/toomyy94/ImHere-Chatbot/blob/master/Resources/ESVideoVersaoFinal.wmv)
+* [Github](https://github.com/toomyy94/ImHere-Chatbot/blob/master/Resources/ESVideoVersaoFinal.wmv)
 * [Youtube link ](https://www.youtube.com/watch?v=Z_xce1-siTc)
 
 ### Technologies used
